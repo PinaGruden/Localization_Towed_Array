@@ -1,2 +1,3 @@
-# Localization_Towed_Array
- Localization with ambiguity surfaces for towed array data
+# Localization Towed Array
+ 
+ This repo contains code for the localization with ambiguity surfaces for towed array data. 
