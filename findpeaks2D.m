@@ -32,7 +32,7 @@ h=figure;
 % peaks
 surf(X,Y,LStotal),hold on
 hold on
-plot3(X(peak_inds),Y(peak_inds),LStotal(peak_inds),'r*','MarkerSize',24)
+plot3(X(peak_inds),Y(peak_inds),LStotal(peak_inds),'r*','MarkerSize',12,'Linewidth',2)
 xlabel('x (m)'),ylabel('y (m)'), zlabel('Ambiguity value')
 colorbar
 fontsize(h,14,'points')
