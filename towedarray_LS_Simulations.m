@@ -128,13 +128,14 @@ plot([hyph_pos(ip1,1,1),hyph_pos(ip1,1,end)],[hyph_pos(ip1,2,1),hyph_pos(ip1,2,e
 plot(true_wpos(1),true_wpos(2),'r*','MarkerSize',12,'Linewidth',2)
 xlabel(' x (m)'),ylabel('y (m)')
 legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+title('Intesecting hyperbolas')
 fontsize(fig3,14,'points')
 
 
 %~~~~~~~~~~~~ Determine Ambiguity surface Peak Height and Width~~~~~~~~~~~
 disp(' ')
 disp('Simulation 1: Stationary source, moving array, no noise on measurements.')
-
+disp(' ')
 [peakdata] =findpeaks2D(X,Y,LStotal);
 fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(end,:))-1), '%g]\n'],true_wpos(end,:))
 %take just one of the estimated peaks (the other is mirror image)
@@ -272,12 +273,14 @@ plot([hyph_pos(ip1,1,1),hyph_pos(ip1,1,end)],[hyph_pos(ip1,2,1),hyph_pos(ip1,2,e
 plot(true_wpos(1),true_wpos(2),'r*','MarkerSize',12,'Linewidth',2)
 xlabel(' x (m)'),ylabel('y (m)')
 legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+title ('Intesecting Hyperbolas')
 fontsize(fig3,14,'points')
 
 
 %~~~~~~~~~~~~ Determine Ambiguity surface Peak Height and Width~~~~~~~~~~~
 disp(' ')
 disp('Simulation 2: Stationary source, moving array, noisy measurements.')
+disp(' ')
 
 [peakdata] =findpeaks2D(X,Y,LStotal);
 fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(end,:))-1), '%g]\n'],true_wpos(end,:))
@@ -495,6 +498,7 @@ plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'r*-','
 end
 xlabel(' x (m)'),ylabel('y (m)')
 legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+title ('Intersecting hyperbolas')
 fontsize(fig5,14,'points')
 
 
@@ -502,6 +506,7 @@ fontsize(fig5,14,'points')
 disp(' ')
 disp(['Simulation 3: Moving source, moving array, no noise on measurements.' ...
     ' Incorporates Surface dilation'])
+disp(' ')
 
 % WITHOUT DILATION
 [peakdata] =findpeaks2D(X,Y,LStotal);
@@ -540,28 +545,35 @@ fprintf('Number of sensors used is %.0f \n',Nsensors)
 %% SIMULATION 4: Moving source, moving array with more sensors, no noise on measurements
 
 clear,close all
-%Determine sigma (std) for the Gaussian:
-sig =0.003; %0.005 (if whale moves faster)
 
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~Set parameters~~~~~~~~~~~~~~~~~~~~~~~~~~
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
 Ntsteps=4; %number of time steps
+true_wpos(1,:)= [100,50,0]; %[x,y,z]; %Set True whale position
+Nsources=size(true_wpos,1);
+d1= 3; %distance between sensors (1&2)
+d2=40; %distance between sensors (2&3)
+c=1500; % Speed of sound
 
-% Simulate Hydrophone positions - 3 sensors
+% sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
+% %(for visual assesment of how they are crossing)- needs to be small
 
-hyph_pos(:,:,1)=[0,0,0;3,0,0;40,0,0]; %[x1,y1,z1; x2,y2,z2; x3,y3,z3];
+%~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
+hyph_pos(:,:,1)=[0,0,0;d1,0,0;d2,0,0]; %[x1,y1,z1; x2,y2,z2; x3,y3,z3];
 for t=2:Ntsteps
 hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[50,0,0;50,0,0;50,0,0];
 end
 Nsensors=size(hyph_pos,1);
 
-% True whale position
-true_wpos(1,:)= [100,50,0]; %[x,y,z];
+%~~~~~~~~~~~~~~~~~~~~~~Simulate True Whale positions~~~~~~~~~~~~~~~~~~~~~~
 for t=2:Ntsteps
-true_wpos(t,:)= true_wpos(t-1,:) + [3,6,0]; %[x,y,z];  + [10,16,0]; %for faster moving whale (almost 4kts)
+true_wpos(t,:)= true_wpos(t-1,:) + [3,6,0]; % [x,y,z];
+% Slow swimming whale + [3,6,0];
+% Fast swimming whale + [8.7,17.4,0];
 end
 
-% True TDOAs
+%~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % compute tdoas between all sensors:
-c=1500;
 Ncombos=Nsensors*(Nsensors-1)- sum((Nsensors-1):-1:1); %Number of tdoa pairs
 true_tdoas= cell(1,Ncombos);
 count=1;
@@ -584,13 +596,14 @@ for ip1=1:Nsensors
     end
 end
 
+%~~~~~~~~~~~~~~~~~~~~~~~~Create measurements~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %re-arrange so that the measured tdoas are per time step (matrix of (Ncombos,Ntsteps)):
 tdoa_measured = vertcat(true_tdoas{:}); %Assume for the moment no noise in measurements
 
-% Cell grids to evaluate:
-% It could move with the hydrophone position or cover an entire area - what
-% is better??
-x=-200:5:200;
+%~~~~~~~~~~~~~~~~~~~Create a grid for surface evaluation~~~~~~~~~~~~~~~~~~
+% At the moment grid is fixed, but in future it should move with sensors.
+dx=5;
+x=-200:dx:200;
 Ngp_x=length(x);
 y=x;
 z=0;
@@ -599,6 +612,8 @@ Ngp_z=length(z);
 wpos=[X(:),Y(:),Z(:)]; %gives grid of N x [x,y,z] coordinates
 N= size(wpos,1); %number of grid points to evaluate
 
+%~~~~~~~~~~~~~~~~~~~Compute Ambiguity Surfaces~~~~~~~~~~~~~~~~~~~
+%Pre-allocate:
 LStotal_tstep=zeros(1,N,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for all hydrophone pairs)
@@ -653,34 +668,37 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
     for k=1:Nsensors
         plot(rp(k,1),rp(k,2),'r^','MarkerFaceColor','r'),hold on
     end
-    plot(true_wpos(t,1),true_wpos(t,2),'k*')
+    plot(true_wpos(t,1),true_wpos(t,2),'r*','MarkerSize',12,'Linewidth',2)
     colorbar
     xlabel(' x (m)'),ylabel('y (m)')
-    title(['Ambiguity surface at time step ',num2str(t)])
+    title(['Total Ambiguity surface at time step ',num2str(t)])
 
 end
 
+
+%~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LStotal_tstep,3);
 LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_x,Ngp_z]);
-figure,
-pcolor(X,Y,LStotal),hold on
-hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-'),hold on
-for k=2:Ntsteps
-plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'k*-')
-end
-xlabel(' x (m)'),ylabel('y (m)'), title ('Total ambiguity surface')
+h=figure; hold on;
+pcolor(X,Y,LStotal)
 clim([0,1])
 colorbar
+hph=1;
+plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-','Linewidth',3),hold on
+for k=2:Ntsteps
+plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'r*-','MarkerSize',12,'Linewidth',2)
+end
+xlabel(' x (m)'),ylabel('y (m)'), title ('Total ambiguity surface')
+legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+fontsize(h,14,'points')
 
-%this is same as below with findpeaks, but findpeaks reports the width of
-%the peak as well
-% [LSval,indx]=max(LStotal, [], 'all');
-% estimated_position= [X(indx),Y(indx),0]
-% LSval
-% true_end_position =true_wpos(end,:)
 
-findpeaks_2d_loop
+%~~~~~~~~~~~~ Determine Ambiguity surface Peak Height and Width~~~~~~~~~~~
+disp(' ')
+disp('Simulation 4: Moving source, moving array with more sensors, no noise on measurements.')
+disp(' ')
+
+[peakdata] =findpeaks2D(X,Y,LStotal);
 fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(end,:))-1), '%g]\n'],true_wpos(end,:))
 %take just one of the estimated peaks (the other is mirror image)
 n=1;
@@ -689,37 +707,40 @@ fprintf(['Estimated whale location is: [', repmat('%g, ', 1, numel(estimated_pos
 fprintf('Width of the peak in X dirextion %.2f \n',peakdata.peakXWidth(n))
 fprintf('Width of the peak in Y dirextion %.2f \n',peakdata.peakYWidth(n))
 fprintf('Ambiguity value for the estimated location is %.2f \n',peakdata.peakZ(n))
-fprintf('The variance used for Gaussian is %.3f \n',sig)
+fprintf('The std used for Gaussian is %.3f \n',sig)
 fprintf('Number of sensors used is %.0f \n',Nsensors)
-% fprintf(' Estimated locations in X dirextion %.2f \n',peakdata.peakX)
-% fprintf(' Estimated locations in Y dirextion %.2f \n',peakdata.peakY)
-
-
+%//////////////////////////////////////////////////////////////////////////
 
 %//////////////////////////////////////////////////////////////////////////
 %% SIMULATION 5: Moving array (2 sensors), two stationary sources, no noise
 
 clear, close all
-%Determine sigma (variance) for the Gaussian:
-sig =0.003;
 
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~Set parameters~~~~~~~~~~~~~~~~~~~~~~~~~~
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
 Ntsteps=4; %number of time steps
+d=40; %distance between sensors
+c=1500; % Speed of sound
 
-% Simulate Hydrophone positions
-hyph_pos(:,:,1)=[0,0,0;40,0,0]; %[x1,y1,z1; x2,y2,z2];
+sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
+%(for visual assesment of how they are crossing)- needs to be small
+
+%~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
+hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
 for t=2:Ntsteps
 hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[50,0,0;50,0,0];
 end
+Nsensors=size(hyph_pos,1);
 
-% True whales positions
+%~~~~~~~~~~~~~~~~~~~~~~Simulate True Whale positions~~~~~~~~~~~~~~~~~~~~~~
+% Two stationary sources
 true_wpos(1,:)= [100,50,0]; %[x,y,z];
 true_wpos(2,:)= [10,100,0];
 Nsources=size(true_wpos,1);
 
-% True TDOAs
+%~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 true_tdoa=zeros(Nsources,Ntsteps);
 ip1=1;ip2=2;
-c=1500;
 for t=1:Ntsteps
     rp=hyph_pos(:,:,t);
     dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(:,1)).^2 + ...
@@ -732,13 +753,14 @@ for t=1:Ntsteps
 end
 
 
+%~~~~~~~~~~~~~~~~~~~~~~~~Create measurements~~~~~~~~~~~~~~~~~~~~~~~~~~~
 tdoa_measured = true_tdoa; %Assume for the moment no noise in measurements
 %measurements are a matrix Nsources x Nsteps
 
-% Cell grids to evaluate:
-% It could move with the hydrophone position or cover an entire area - what
-% is better??
-x=-200:5:200;
+%~~~~~~~~~~~~~~~~~~~Create a grid for surface evaluation~~~~~~~~~~~~~~~~~~
+% At the moment grid is fixed, but in future it should move with sensors.
+dx=5; % grid step size
+x=-200:dx:200;
 Ngp_x=length(x);
 y=x;
 z=0;
@@ -748,6 +770,9 @@ wpos=[X(:),Y(:),Z(:)]; %gives grid of N x [x,y,z] coordinates
 N= size(wpos,1); %number of grid points to evaluate
 
 
+%~~~~~~~~~~~~~~~~~~~Compute Ambiguity Surfaces~~~~~~~~~~~~~~~~~~~
+%Pre-allocate:
+LS=nan(Nsources,N,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS
 
@@ -770,6 +795,8 @@ end
 
 LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(:,t)).^2);
 
+
+%PLOT Ambiguity Surface for each source at time t
 figure,hold on
 for n=1:Nsources
 LStotal_temp=reshape(LS(n,:,t),[Ngp_x,Ngp_x,Ngp_z]);
@@ -778,7 +805,7 @@ pcolor(X,Y,LStotal_temp); hold on
 clim([0,1])
 plot(rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r'),hold on
 plot(rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
-plot(true_wpos(n,1),true_wpos(n,2),'k*')
+plot(true_wpos(n,1),true_wpos(n,2),'r*','MarkerSize',12,'Linewidth',2)
 colorbar
 xlabel(' x (m)'),ylabel('y (m)')
 title(['LS for source ',num2str(n),' time step ', num2str(t)])
@@ -787,7 +814,7 @@ end
 end
 
 
-
+%~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LS,3);
 figure, hold on
 for n=1:Nsources
@@ -795,10 +822,35 @@ LStotal=reshape(LStotal_temp(n,:),[Ngp_x,Ngp_x,Ngp_z]);
 subplot(1,Nsources,n)
 pcolor(X,Y,LStotal),hold on
 hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-'),hold on
-plot(true_wpos(n,1),true_wpos(n,2),'r*')
+plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-','Linewidth',3),hold on
+plot(true_wpos(n,1),true_wpos(n,2),'r*','MarkerSize',12,'Linewidth',2)
 xlabel(' x (m)'),ylabel('y (m)')
-title ('Total ambiguity surface')
+title (['Total ambiguity surface for source ', num2str(n)])
 clim([0,1])
 colorbar
 end
+
+%~~~~~~~~~~~~ Determine Ambiguity surface Peak Height and Width~~~~~~~~~~~
+disp(' ')
+disp('Simulation 5: Two stationary sources, moving array, no noise on measurements.')
+disp(' ')
+
+for m=1:Nsources
+    disp('--------------------------- ')
+    fprintf('Source %.0f \n',m)
+
+LStotal=reshape(LStotal_temp(m,:),[Ngp_x,Ngp_x,Ngp_z]);   
+[peakdata] =findpeaks2D(X,Y,LStotal);
+fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(m,:))-1), '%g]\n'],true_wpos(m,:))
+%take just one of the estimated peaks (the other is mirror image)
+n=1;
+estimated_position=[peakdata.peakX(n),peakdata.peakY(n),0]; %were at the moment considering 2D, so z coordinate = 0.
+fprintf(['Estimated whale location is: [', repmat('%g, ', 1, numel(estimated_position)-1), '%g]\n'],estimated_position)
+fprintf('Width of the peak in X dirextion %.2f \n',peakdata.peakXWidth(n))
+fprintf('Width of the peak in Y dirextion %.2f \n',peakdata.peakYWidth(n))
+fprintf('Ambiguity value for the estimated location is %.2f \n',peakdata.peakZ(n))
+fprintf('The std used for Gaussian is %.3f \n',sig)
+fprintf('Number of sensors used is %.0f \n',Nsensors)
+
+end
+%//////////////////////////////////////////////////////////////////////////
