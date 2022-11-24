@@ -303,35 +303,57 @@ fprintf('Number of sensors used is %.0f \n',Nsensors)
 clear,close all
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~Set parameters~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ntsteps=4; %number of time steps
+
+%-------- Parameters for Ambiguity surface computation -------------
 sig =0.002; %Determine sigma (standard deviation) for the Gaussian:
-Ntsteps=6; %number of time steps
-true_wpos(1,:)= [100,10,0]; %[x,y,z]; %Set the START of True whale position 
-% (note, the whale will move in this simulation)
-Nsources=size(true_wpos,1);
-d=40; %distance between sensors
-c=1500; % Speed of sound
 sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
-% For surface dilation:
-mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s]
+%--------  Parameters for the source simulation ----------------  
+true_wpos(1,:)= [100,10,0]; %[x,y,z]; %Set the START of True whale position 
+% (note, the whale will move in this simulation)
+Nsources=size(true_wpos,1);
+mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s] 
+% (Also used for surface dilation)
+swim_direction = 'x'; % which direction whale moves - 'x', 'y', or 'xy'
 
-% Parameters for modeled TDOA grid range and resolution
+%--------  Parameters for the boat and array simulation ----------------  
+d=40; %distance between sensors
+boatspeed_kts = 10; % boat speed in knots
+boatspeed= boatspeed_kts/1.944; %boat speed in m/s
+timestep = 10; % how much time elapses in each time step in s
+
+%--------  Parameters for modeled TDOA ---------------- 
+% - Grid range and resolution:
 xrange=[-300,300]; % x range in m
 yrange=[-300,300]; % y range in m
 dx=5; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
+% - Speed of sound
+c=1500;
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[50,0,0;50,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
 end
 Nsensors=size(hyph_pos,1);
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate True Whale positions~~~~~~~~~~~~~~~~~~~~~~
+whalemove=mean_horiz_swimspeed*timestep;
+switch swim_direction
+    case 'x'
+        whalemove_t=[whalemove,0,0];
+    case 'y'
+        whalemove_t=[0,whalemove,0];
+    case 'xy'
+        whalemove_t=[whalemove/2,whalemove/2,0];
+end
 for t=2:Ntsteps
-true_wpos(t,:)= true_wpos(t-1,:) + [3,6,0]; % [x,y,z];
+true_wpos(t,:)= true_wpos(t-1,:) + whalemove_t; % [x,y,z];
 % Slow swimming whale + [3,6,0];
 % Fast swimming whale + [8.7,17.4,0];
 end
@@ -408,19 +430,20 @@ LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
 hfig1{t}=subplot(1,Ntsteps,t,'Parent', fig1); hold on;
 pcolor(hfig1{t},X,Y,LStotal_temp); 
 clim([0,1])
+colorbar
+shading interp
+axis equal
+axis tight
 hold on;plot(hfig1{t},rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r')
 hold on;plot(hfig1{t},rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
 hold on;plot(hfig1{t},true_wpos(t,1),true_wpos(t,2),'r*','MarkerSize',12,'Linewidth',2)
-colorbar
 xlabel(' x (m)'),ylabel('y (m)')
 hold off
 
 %///////////////////DILATE SURFACES////////////////////////////////
 % Apply Surface dilation filter (imdilate) to compensate for whale movement:
 
-dt90 = 9.73*abs(t-tstep90); %Elapsed time from when animals are at 90deg (0 tdoa) [s]
-%(50m per time step equates to 9.73 s per time step if 
-% the boat moves in each time step 50 m assuming it travels 10kts (5.144m/s))
+dt90 = timestep*abs(t-tstep90); %Elapsed time from when animals are at 90deg (0 tdoa) [s]
 if dt90==0
 dt90=2;
 end
@@ -439,14 +462,20 @@ LSdilate(:,:,t)=imdilate(LStotal_temp,(De<=1));
 %//////////////////////////////////////////////////////////////////
 
 end
+ss = get(0, 'Screensize'); %
+set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
-%~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~~
+
+% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~~
 LStotal_temp=prod(LS,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_x,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
 fig2=figure; hold on,
 pcolor(X,Y,LStotal);
 clim([0,1])
 colorbar
+shading interp
+axis equal
+axis tight
 plot([hyph_pos(ip1,1,1),hyph_pos(ip1,1,end)],[hyph_pos(ip1,2,1),hyph_pos(ip1,2,end)],'r-', 'Linewidth', 3),hold on
 for k=2:Ntsteps
 plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'r*-','MarkerSize',12,'Linewidth',2)
@@ -455,6 +484,7 @@ xlabel(' x (m)'),ylabel('y (m)')
 title(['Total ambiguity surface WITHOUT dilation for \sigma=',num2str(sig)])
 legend('Ambiguity Surface','Boat track', 'True whale position')
 fontsize(fig2,14,'points')
+
 
 %~~~~~~~~~~~~~~PLOT dilated Ambiguity Surfaces for each time t~~~~~~~~~~~~~
 % PLOT dilated surface (for some reason it messes up fig 1 if plotted
@@ -467,14 +497,19 @@ rp=hyph_pos(:,:,t);
 hfig2{t}=subplot(1,Ntsteps,t,'Parent', fig3); hold on;
 pcolor(hfig2{t},X,Y,LSdilate(:,:,t)); hold on;
 clim([0,1])
+colorbar
+shading interp
+axis equal
+axis tight
 plot(hfig2{t},rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r'),hold on
 plot(hfig2{t},rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
 plot(hfig2{t},true_wpos(t,1),true_wpos(t,2),'r*','Markersize',10, 'LineWidth',3)
-colorbar
 xlabel(' x (m)'),ylabel('y (m)')
 hold off
 end
 title('Dilated ambiguity surfaces')
+ss = get(0, 'Screensize'); %
+set(fig3, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
 %~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface with Dilation~~~~~~~~~~~~~
 LSdilatetotal=prod(LSdilate,3);
@@ -482,6 +517,9 @@ fig4=figure; hold on,
 pcolor(X,Y,LSdilatetotal);
 clim([0,1])
 colorbar
+shading interp
+axis equal
+axis tight
 plot([hyph_pos(ip1,1,1),hyph_pos(ip1,1,end)],[hyph_pos(ip1,2,1),hyph_pos(ip1,2,end)],'r-', 'Linewidth', 3),hold on
 for k=2:Ntsteps
 plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'r*-','MarkerSize',12,'Linewidth',2)
@@ -494,12 +532,15 @@ fontsize(fig4,14,'points')
 
 %~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
 LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3);
-LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_x,Ngp_x,Ngp_z]);
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_x,Ngp_y,Ngp_z]);
 fig5=figure;
 pcolor(X,Y,LStotal_hyperbolas); hold on
 set(gca,'YDir', 'normal');
 clim([0,1])
 colorbar
+shading interp
+axis equal
+axis tight
 plot([hyph_pos(ip1,1,1),hyph_pos(ip1,1,end)],[hyph_pos(ip1,2,1),hyph_pos(ip1,2,end)],'r-', 'Linewidth', 3),hold on
 for k=2:Ntsteps
 plot([true_wpos(k-1,1),true_wpos(k,1)],[true_wpos(k-1,2),true_wpos(k,2)],'r*-','MarkerSize',12,'Linewidth',2)
