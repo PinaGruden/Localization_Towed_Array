@@ -312,12 +312,12 @@ sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
 %--------  Parameters for the source simulation ----------------  
-true_wpos(1,:)= [100,10,0]; %[x,y,z]; %Set the START of True whale position 
+true_wpos(1,:)= [200,100,0]; %[x,y,z]; %Set the START of True whale position 
 % (note, the whale will move in this simulation)
 Nsources=size(true_wpos,1);
 mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s] 
 % (Also used for surface dilation)
-swim_direction = 'x'; % which direction whale moves - 'x', 'y', or 'xy'
+swim_direction = 'xy'; % which direction whale moves - 'x', 'y', or 'xy'
 
 %--------  Parameters for the boat and array simulation ----------------  
 d=40; %distance between sensors
