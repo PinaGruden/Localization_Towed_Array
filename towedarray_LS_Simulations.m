@@ -316,6 +316,12 @@ sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
 % For surface dilation:
 mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s]
 
+% Parameters for modeled TDOA grid range and resolution
+xrange=[-300,300]; % x range in m
+yrange=[-300,300]; % y range in m
+dx=5; % grid step size in m (resolution) in x direction
+dy=dx;% grid step size in m (resolution) in y direction
+
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
 for t=2:Ntsteps
@@ -349,10 +355,10 @@ tdoa_measured = true_tdoa; %Assume for the moment no noise in measurements
 
 %~~~~~~~~~~~~~~~~~~~Create a grid for surface evaluation~~~~~~~~~~~~~~~~~~
 % At the moment grid is fixed, but in future it should move with sensors.
-dx=5; % grid step size
-x=-300:dx:300;
+x=xrange(1):dx:xrange(2);
 Ngp_x=length(x);
-y=x;
+y=yrange(1):dy:yrange(2);
+Ngp_y=length(y);
 z=0;
 Ngp_z=length(z);
 [X,Y,Z] = meshgrid(x,y,z);
@@ -372,7 +378,7 @@ tstep90=tsteps(ind);
 %Pre-allocate:
 LS=nan(Nsources,N,Ntsteps); 
 LS_Hyperbolas = LS;
-LSdilate = nan(Ngp_x,Ngp_x,Ntsteps);
+LSdilate = nan(Ngp_x,Ngp_y,Ntsteps);
 fig1=figure; hfig1=cell(1,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS
@@ -398,7 +404,7 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(t)).^2);
 LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*(tdoa_model-tdoa_measured(t)).^2);
 
 % PLOT Ambiguity Surface at time t (without surface dilation)
-LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_x,Ngp_z]);
+LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
 hfig1{t}=subplot(1,Ntsteps,t,'Parent', fig1); hold on;
 pcolor(hfig1{t},X,Y,LStotal_temp); 
 clim([0,1])
@@ -423,7 +429,9 @@ mdwh=dt90*mean_horiz_swimspeed; %maximum distance whale could have travelled hor
 %gridpoints for filter in x (and also y since the same assumptions re swim speed and grid space)
 xgridf=0:dx:(mdwh+dx);
 filt_x_grid = [-fliplr(xgridf(2:end)),xgridf];
-[Fx,Fy] = meshgrid(filt_x_grid,filt_x_grid);
+ygridf=0:dy:(mdwh+dx);
+filt_y_grid = [-fliplr(ygridf(2:end)),ygridf];
+[Fx,Fy] = meshgrid(filt_x_grid,filt_y_grid);
 De = Fx.^2/mdwh^2 + Fy.^2/mdwh^2; %normalize to max distance that the whale could have swam (feasible distance will be 1 or lower/ or is it 2 or lower??)
 %F = zeros(size(De)); F((De <=1)) = 1;
 
