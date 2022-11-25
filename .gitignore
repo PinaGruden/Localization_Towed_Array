@@ -1,6 +1,9 @@
 # Project specific files and folders #
 ######################
-.asv
+
+# Matlab generated files #
+######################
+*.asv
 
 # OS generated files #
 ######################
