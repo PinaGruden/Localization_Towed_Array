@@ -45,9 +45,10 @@ c=1500;
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
 boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
 Nsensors=size(hyph_pos,1);
 
@@ -221,9 +222,10 @@ measure_noise=0.001; % measurement noise (needs to be equal or less than
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
 boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
 Nsensors=size(hyph_pos,1);
 
@@ -402,9 +404,10 @@ c=1500;
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
 boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
 Nsensors=size(hyph_pos,1);
 
@@ -662,27 +665,60 @@ fprintf('Number of sensors used is %.0f \n',Nsensors)
 clear,close all
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~Set parameters~~~~~~~~~~~~~~~~~~~~~~~~~~
-sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
-Ntsteps=4; %number of time steps
-true_wpos(1,:)= [100,50,0]; %[x,y,z]; %Set True whale position
-Nsources=size(true_wpos,1);
-d1= 3; %distance between sensors (1&2)
-d2=40; %distance between sensors (2&3)
-c=1500; % Speed of sound
 
-% sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
-% %(for visual assesment of how they are crossing)- needs to be small
+Ntsteps=4; %number of time steps
+
+%-------- Parameters for Ambiguity surface computation -------------
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
+sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
+%(for visual assesment of how they are crossing)- needs to be small
+
+%--------  Parameters for the source simulation ----------------  
+true_wpos(1,:)= [100,50,0]; %[x,y,z]; %Set the START of True whale position 
+% (note, the whale will move in this simulation)
+Nsources=size(true_wpos,1);
+mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s] 
+% (Also used for surface dilation)
+swim_direction = 'xy'; % which direction whale moves - 'x', 'y', or 'xy'
+
+%--------  Parameters for the boat and array simulation ----------------  
+d1=3; %distance between sensors 1&2
+d2=40; %distance between sensors 2&3
+boatspeed_kts = 10; % boat speed in knots
+boatspeed= boatspeed_kts/1.944; %boat speed in m/s
+timestep = 10; % how much time elapses in each time step in s
+
+%--------  Parameters for modeled TDOA ---------------- 
+% - Grid range and resolution:
+xrange=[-300,300]; % x range in m
+yrange=[-300,300]; % y range in m
+dx=5; % grid step size in m (resolution) in x direction
+dy=dx;% grid step size in m (resolution) in y direction
+% - Speed of sound
+c=1500;
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
+%The boat is moving along x direction
 hyph_pos(:,:,1)=[0,0,0;d1,0,0;d2,0,0]; %[x1,y1,z1; x2,y2,z2; x3,y3,z3];
+Nsensors=size(hyph_pos,1);
+boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[50,0,0;50,0,0;50,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
 Nsensors=size(hyph_pos,1);
 
 %~~~~~~~~~~~~~~~~~~~~~~Simulate True Whale positions~~~~~~~~~~~~~~~~~~~~~~
+whalemove=mean_horiz_swimspeed*timestep;
+switch swim_direction
+    case 'x'
+        whalemove_t=[whalemove,0,0];
+    case 'y'
+        whalemove_t=[0,whalemove,0];
+    case 'xy'
+        whalemove_t=[whalemove/2,whalemove/2,0];
+end
 for t=2:Ntsteps
-true_wpos(t,:)= true_wpos(t-1,:) + [3,6,0]; % [x,y,z];
+true_wpos(t,:)= true_wpos(t-1,:) + whalemove_t; % [x,y,z];
 % Slow swimming whale + [3,6,0];
 % Fast swimming whale + [8.7,17.4,0];
 end
@@ -717,10 +753,10 @@ tdoa_measured = vertcat(true_tdoas{:}); %Assume for the moment no noise in measu
 
 %~~~~~~~~~~~~~~~~~~~Create a grid for surface evaluation~~~~~~~~~~~~~~~~~~
 % At the moment grid is fixed, but in future it should move with sensors.
-dx=5;
-x=-200:dx:200;
+x=xrange(1):dx:xrange(2);
 Ngp_x=length(x);
-y=x;
+y=yrange(1):dy:yrange(2);
+Ngp_y=length(y);
 z=0;
 Ngp_z=length(z);
 [X,Y,Z] = meshgrid(x,y,z);
@@ -729,7 +765,7 @@ N= size(wpos,1); %number of grid points to evaluate
 
 %~~~~~~~~~~~~~~~~~~~Compute Ambiguity Surfaces~~~~~~~~~~~~~~~~~~~
 %Pre-allocate:
-LStotal_tstep=zeros(1,N,Ntsteps);
+LStotal_tstep=zeros(Nsources,N,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for all hydrophone pairs)
 
@@ -737,7 +773,7 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
     count=1;
 
     LS_temp=zeros(Ncombos,N);
-    figure, hold on
+    fig1=figure; hold on
     for ip1=1:Nsensors
         for ip2= ip1+1:Nsensors
             tdoa_model=zeros(1,N);
@@ -758,14 +794,17 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
             LS_temp(count,:)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(count,t)).^2);
             
 
-            LStotal_temp=reshape(LS_temp(count,:),[Ngp_x,Ngp_x,Ngp_z]);
+            LStotal_temp=reshape(LS_temp(count,:),[Ngp_x,Ngp_y,Ngp_z]);
             subplot(1,Nsensors,count)
-            pcolor(X,Y,LStotal_temp); hold on
+            s=pcolor(X,Y,LStotal_temp); hold on
+            s.EdgeColor='none';
             clim([0,1])
+            colorbar
+            axis equal
+            axis tight
             plot(rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r'),hold on
             plot(rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
-            plot(true_wpos(t,1),true_wpos(t,2),'k*')
-            colorbar
+            plot(true_wpos(t,1),true_wpos(t,2),'r*','MarkerSize',12,'Linewidth',2)
             xlabel(' x (m)'),ylabel('y (m)')
             title(['Ambiguity surface at time step ',num2str(t),...
                 ', sensors ', num2str(ip1), ' and ', num2str(ip2)])
@@ -774,17 +813,22 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
 
         end
     end
+    ss = get(0, 'Screensize'); %
+    set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
     LStotal_tstep(:,:,t) = prod(LS_temp);
-    LStotal_tstep_temp=reshape(LStotal_tstep(:,:,t),[Ngp_x,Ngp_x,Ngp_z]);
-    figure,
-    pcolor(X,Y,LStotal_tstep_temp); hold on
+    LStotal_tstep_temp=reshape(LStotal_tstep(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+    fig2=figure;
+    s=pcolor(X,Y,LStotal_tstep_temp); hold on
+    s.EdgeColor='none';
     clim([0,1])
+    colorbar
+    axis equal
+    axis tight
     for k=1:Nsensors
         plot(rp(k,1),rp(k,2),'r^','MarkerFaceColor','r'),hold on
     end
     plot(true_wpos(t,1),true_wpos(t,2),'r*','MarkerSize',12,'Linewidth',2)
-    colorbar
     xlabel(' x (m)'),ylabel('y (m)')
     title(['Total Ambiguity surface at time step ',num2str(t)])
 
@@ -793,11 +837,14 @@ end
 
 %~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LStotal_tstep,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_x,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
 h=figure; hold on;
-pcolor(X,Y,LStotal)
+s=pcolor(X,Y,LStotal);
+s.EdgeColor='none';
 clim([0,1])
 colorbar
+axis equal
+axis tight
 hph=1;
 plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-','Linewidth',3),hold on
 for k=2:Ntsteps
