@@ -53,17 +53,17 @@ end
 Nsensors=size(hyph_pos,1);
 
 %~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-true_tdoa=zeros(1,Ntsteps);
+true_tdoa=zeros(Nsources,Ntsteps);
 ip1=1;ip2=2;
 for t=1:Ntsteps
     rp=hyph_pos(:,:,t);
-    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(1))^2 + ...
-        (rp(ip1,2)-true_wpos(2))^2 + ...
-        (rp(ip1,3)-true_wpos(3))^2);
-    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(1))^2 + ...
-        (rp(ip2,2)-true_wpos(2))^2 + ...
-        (rp(ip2,3)-true_wpos(3))^2);
-    true_tdoa(t) = dt1-dt2;
+    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip1,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip1,3)-true_wpos(:,3)).^2);
+    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip2,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip2,3)-true_wpos(:,3)).^2);
+    true_tdoa(:,t) = dt1-dt2;
 end
 
 %~~~~~~~~~~~~~~~~~~~~~~~~Create measurements~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,17 +231,17 @@ Nsensors=size(hyph_pos,1);
 
 
 %~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-true_tdoa=zeros(1,Ntsteps);
+true_tdoa=zeros(Nsources,Ntsteps);
 ip1=1;ip2=2;
 for t=1:Ntsteps
     rp=hyph_pos(:,:,t);
-    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(1))^2 + ...
-        (rp(ip1,2)-true_wpos(2))^2 + ...
-        (rp(ip1,3)-true_wpos(3))^2);
-    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(1))^2 + ...
-        (rp(ip2,2)-true_wpos(2))^2 + ...
-        (rp(ip2,3)-true_wpos(3))^2);
-    true_tdoa(t) = dt1-dt2;
+    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip1,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip1,3)-true_wpos(:,3)).^2);
+    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip2,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip2,3)-true_wpos(:,3)).^2);
+    true_tdoa(:,t) = dt1-dt2;
 end
 
 %~~~~~~~~~~~~~~~~~~~~~~~~Create measurements~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -428,17 +428,17 @@ true_wpos(t,:)= true_wpos(t-1,:) + whalemove_t; % [x,y,z];
 end
 
 %~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-true_tdoa=zeros(1,Ntsteps);
+true_tdoa=zeros(Nsources,Ntsteps);
 ip1=1;ip2=2;
 for t=1:Ntsteps
     rp=hyph_pos(:,:,t);
-    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(t,1))^2 + ...
-        (rp(ip1,2)-true_wpos(t,2))^2 + ...
-        (rp(ip1,3)-true_wpos(t,3))^2);
-    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(t,1))^2 + ...
-        (rp(ip2,2)-true_wpos(t,2))^2 + ...
-        (rp(ip2,3)-true_wpos(t,3))^2);
-    true_tdoa(t) = dt1-dt2;
+    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip1,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip1,3)-true_wpos(:,3)).^2);
+    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(:,1)).^2 + ...
+        (rp(ip2,2)-true_wpos(:,2)).^2 + ...
+        (rp(ip2,3)-true_wpos(:,3)).^2);
+    true_tdoa(:,t) = dt1-dt2;
 end
 
 %~~~~~~~~~~~~~~~~~~~~~~~~Create measurements~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -879,26 +879,48 @@ fprintf('Number of sensors used is %.0f \n',Nsensors)
 clear, close all
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~Set parameters~~~~~~~~~~~~~~~~~~~~~~~~~~
-sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
-Ntsteps=4; %number of time steps
-d=40; %distance between sensors
-c=1500; % Speed of sound
 
+Ntsteps=4; %number of time steps
+
+%-------- Parameters for Ambiguity surface computation -------------
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian:
 sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
+%--------  Parameters for the source simulation ----------------  
+true_wpos(1,:)= [100,50,0]; %[x,y,z]; %Set the START of True whale position 
+% (note, the whale will move in this simulation)
+true_wpos(2,:)= [10,100,0];
+Nsources=size(true_wpos,1);
+mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s] 
+% (Also used for surface dilation)
+swim_direction = 'xy'; % which direction whale moves - 'x', 'y', or 'xy'
+
+%--------  Parameters for the boat and array simulation ----------------  
+d=40; %distance between sensors 2&3
+boatspeed_kts = 10; % boat speed in knots
+boatspeed= boatspeed_kts/1.944; %boat speed in m/s
+timestep = 10; % how much time elapses in each time step in s
+
+%--------  Parameters for modeled TDOA ---------------- 
+% - Grid range and resolution:
+xrange=[-300,300]; % x range in m
+yrange=[-300,300]; % y range in m
+dx=5; % grid step size in m (resolution) in x direction
+dy=dx;% grid step size in m (resolution) in y direction
+% - Speed of sound
+c=1500;
+
 %~~~~~~~~~~~~~~~~~~~~~~Simulate Hydrophone positions~~~~~~~~~~~~~~~~~~~~~~
+%The boat is moving along x direction
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
+boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[50,0,0;50,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
 Nsensors=size(hyph_pos,1);
 
-%~~~~~~~~~~~~~~~~~~~~~~Simulate True Whale positions~~~~~~~~~~~~~~~~~~~~~~
-% Two stationary sources
-true_wpos(1,:)= [100,50,0]; %[x,y,z];
-true_wpos(2,:)= [10,100,0];
-Nsources=size(true_wpos,1);
 
 %~~~~~~~~~~~~~~~~~~~~~~Compute True TDOAs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 true_tdoa=zeros(Nsources,Ntsteps);
@@ -921,10 +943,10 @@ tdoa_measured = true_tdoa; %Assume for the moment no noise in measurements
 
 %~~~~~~~~~~~~~~~~~~~Create a grid for surface evaluation~~~~~~~~~~~~~~~~~~
 % At the moment grid is fixed, but in future it should move with sensors.
-dx=5; % grid step size
-x=-200:dx:200;
+x=xrange(1):dx:xrange(2);
 Ngp_x=length(x);
-y=x;
+y=yrange(1):dy:yrange(2);
+Ngp_y=length(y);
 z=0;
 Ngp_z=length(z);
 [X,Y,Z] = meshgrid(x,y,z);
@@ -961,17 +983,22 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(:,t)).^2);
 %PLOT Ambiguity Surface for each source at time t
 figure,hold on
 for n=1:Nsources
-LStotal_temp=reshape(LS(n,:,t),[Ngp_x,Ngp_x,Ngp_z]);
+LStotal_temp=reshape(LS(n,:,t),[Ngp_x,Ngp_y,Ngp_z]);
 subplot(1,Nsources,n)
-pcolor(X,Y,LStotal_temp); hold on
+s=pcolor(X,Y,LStotal_temp); hold on
+s.EdgeColor='none';
 clim([0,1])
+colorbar
+axis equal
+axis tight
 plot(rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r'),hold on
 plot(rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
 plot(true_wpos(n,1),true_wpos(n,2),'r*','MarkerSize',12,'Linewidth',2)
-colorbar
 xlabel(' x (m)'),ylabel('y (m)')
 title(['LS for source ',num2str(n),' time step ', num2str(t)])
 end
+ss = get(0, 'Screensize'); %
+set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
 end
 
@@ -980,16 +1007,19 @@ end
 LStotal_temp=prod(LS,3);
 figure, hold on
 for n=1:Nsources
-LStotal=reshape(LStotal_temp(n,:),[Ngp_x,Ngp_x,Ngp_z]);
-subplot(1,Nsources,n)
-pcolor(X,Y,LStotal),hold on
-hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-','Linewidth',3),hold on
-plot(true_wpos(n,1),true_wpos(n,2),'r*','MarkerSize',12,'Linewidth',2)
-xlabel(' x (m)'),ylabel('y (m)')
-title (['Total ambiguity surface for source ', num2str(n)])
-clim([0,1])
-colorbar
+    LStotal=reshape(LStotal_temp(n,:),[Ngp_x,Ngp_y,Ngp_z]);
+    subplot(1,Nsources,n)
+    s=pcolor(X,Y,LStotal);hold on
+    s.EdgeColor='none';
+    clim([0,1])
+    colorbar
+    axis equal
+    axis tight
+    hph=1;
+    plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-','Linewidth',3),hold on
+    plot(true_wpos(n,1),true_wpos(n,2),'r*','MarkerSize',12,'Linewidth',2)
+    xlabel(' x (m)'),ylabel('y (m)')
+    title (['Total ambiguity surface for source ', num2str(n)])
 end
 
 %~~~~~~~~~~~~ Determine Ambiguity surface Peak Height and Width~~~~~~~~~~~
@@ -1001,7 +1031,7 @@ for m=1:Nsources
     disp('--------------------------- ')
     fprintf('Source %.0f \n',m)
 
-LStotal=reshape(LStotal_temp(m,:),[Ngp_x,Ngp_x,Ngp_z]);   
+LStotal=reshape(LStotal_temp(m,:),[Ngp_x,Ngp_y,Ngp_z]);   
 [peakdata] =findpeaks2D(X,Y,LStotal);
 fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(m,:))-1), '%g]\n'],true_wpos(m,:))
 %take just one of the estimated peaks (the other is mirror image)
