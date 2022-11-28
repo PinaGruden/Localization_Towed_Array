@@ -1,6 +1,7 @@
 % Towed Array Source Localization with Ambiguity Surface method
 
 % SIMULATIONS:
+
 % - Simulation 1: Stationary source, moving array, no noise on measurements
 % - Simulation 2: Stationary source, moving array, noisy measurements 
 % - Simulation 3: Moving source, moving array, no noise on measurements -
