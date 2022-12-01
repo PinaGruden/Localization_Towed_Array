@@ -6,13 +6,20 @@
 % tracks ambiguity surfaces are computed and localizations made. Note, boat
 % track and hydrophone positions are simulated.
 
+% Make sure you have first run TDOA tracking package ("TDOA_tracking_master") to extract TDOA tracks
+% Also make sure you have extracted data from Pamguard sql database with
+% "Extract_Pamguard_detections" package
 
 clear,close all
-%this is test
 
 % /////////////////// ADD PATHS and EXTRACTED TRACKS: ////////////////////
 % Add path for plotting- change to reflect your path to the TDOA tracking package:
 addpath('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_master'); 
+
+% Load all Pamguard tdoas from detected whistles and clicks
+load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Ground_truth_fromJenn/Lasker_AC109/Lasker_AC109_Extracted_AnnotatedClicks.mat')
+load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Ground_truth_fromJenn/Lasker_AC109/Lasker_AC109_Extracted_AnnotatedWhistles.mat')
+pamguard_parameters=parameters;
 
 % Load data/tracks extracted by the TDOA tracking package:
 load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/LocalizationTest/LaskerAC109_Results/Lasker_AC109_Results.mat')
@@ -23,6 +30,13 @@ load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/Loc
     'Rxy_envelope_ALL','lags','t_serialdate')
 Rxy_envelope_both{2}=Rxy_envelope_ALL.*scalar_whistles;
 
+% Check that the TDOA tracking and Pamguard used the same sensor
+% separation:
+if ~isequal(parameters.d,pamguard_parameters.d)
+    error(['The sensor spacing between TDOA tracking and Pamguard detections' ...
+        ' does not match. Re-check sensor separation and compute TDOAs for' ...
+        ' Pamguard for the sensor separation that matches parameters.d.'])
+end
 
 %//////////////////// SET parameters //////////////////// 
 
@@ -84,6 +98,7 @@ Ntsteps=numel(timevec); %number of time steps
 
 
 %---------------3. PLOT All tracks and selected:------------------
+% a) Plot against cross-correlogram
 parameters.saveplotsofresults=0;
 measure.T=0;
 plot_results(t_serialdate,lags,Rxy_envelope_both,measure,Tracks, parameters)
@@ -92,6 +107,20 @@ for k=1:Nsources
 text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1),num2str(k),'Color','r')
 end
 
+% b) Plot against all Pamguard detections
+figure,hold on;
+plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
+    'Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3)
+plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
+for k=1:size(Tracks,2)
+plot(Tracks(k).time_local, Tracks(k).tdoa,'-','LineWidth',4), hold on
+end
+set(gca,'YDir', 'reverse');
+datetick('x','keeplimits');
+xlim([t_serialdate(1),t_serialdate(end)])
+for k=1:Nsources
+text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1),num2str(k),'Color','r')
+end
 
 %---------- 4. Re-arrange tracks in a matrix (Nsources x Ntsteps)--------
 tdoa_measured= nan(Nsources,Ntsteps);
@@ -116,7 +145,7 @@ Nsensors=size(hyph_pos,1);
 prompt = "Which track/tracks you want to compute the ambiguity surface for? \n" + ...
     " Note, enter a single track number or if track is fragmented, \n " + ...
     "then enter fragments as a 1xN vector. \n " + ...
-    "Look at Figure 2 for track numbers. \n ";
+    "Look at Figure 2 and Figure 4 for track numbers. \n ";
 
 SelectedTracks =input(prompt);
 selected_indx=zeros(length(SelectedTracks),length(timevec));
