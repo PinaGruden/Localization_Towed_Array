@@ -236,6 +236,6 @@ axis equal
 hph=1;
 plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
 xlabel(' x (m)'),ylabel('y (m)')
-legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+legend('Intesecting hyperbolas', 'Boat track')
 title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
 set(gca,'FontSize',16)
