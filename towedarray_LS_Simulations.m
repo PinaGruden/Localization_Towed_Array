@@ -397,7 +397,7 @@ timestep = 10; % how much time elapses in each time step in s
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
 xrange=[-300,300]; % x range in m
-yrange=[-300,300]; % y range in m
+yrange=[-50,300]; % y range in m
 dx=5; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -470,7 +470,8 @@ tstep90=tsteps(ind);
 %Pre-allocate:
 LS=nan(Nsources,N,Ntsteps); 
 LS_Hyperbolas = LS;
-LSdilate = nan(Ngp_x,Ngp_y,Ntsteps);
+LSdilate = nan(Ngp_y,Ngp_x,Ntsteps); %swap x and y inpuput arguments since 
+% reshape() will be used to fill in the values
 fig1=figure; hfig1=cell(1,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS
@@ -517,19 +518,22 @@ hold off
 
 dt90 = timestep*abs(t-tstep90); %Elapsed time from when animals are at 90deg (0 tdoa) [s]
 if dt90==0
-dt90=2;
+
+    LSdilate(:,:,t)=LStotal_temp; %do not dilate if animal is at the beam (the tdoas should be correct)
+
+else
+    mdwh=dt90*mean_horiz_swimspeed; %maximum distance whale could have travelled horizontally [m]
+
+    %gridpoints for filter in x (and also y since the same assumptions re swim speed and grid space)
+    xgridf=0:dx:(mdwh+dx);
+    filt_x_grid = [-fliplr(xgridf(2:end)),xgridf];
+    ygridf=0:dy:(mdwh+dy);
+    filt_y_grid = [-fliplr(ygridf(2:end)),ygridf];
+    [Fx,Fy] = meshgrid(filt_x_grid,filt_y_grid);
+    De = sqrt(Fx.^2+Fy.^2)/mdwh; %normalize to max distance that the whale could have swam (feasible distance will be 1 or lower)
+
+    LSdilate(:,:,t)=imdilate(LStotal_temp,(De<=1));
 end
-mdwh=dt90*mean_horiz_swimspeed; %maximum distance whale could have travelled horizontally [m]
-
-%gridpoints for filter in x (and also y since the same assumptions re swim speed and grid space)
-xgridf=0:dx:(mdwh+dx);
-filt_x_grid = [-fliplr(xgridf(2:end)),xgridf];
-ygridf=0:dy:(mdwh+dy);
-filt_y_grid = [-fliplr(ygridf(2:end)),ygridf];
-[Fx,Fy] = meshgrid(filt_x_grid,filt_y_grid);
-De = sqrt(Fx.^2+Fy.^2)/mdwh; %normalize to max distance that the whale could have swam (feasible distance will be 1 or lower)
-
-LSdilate(:,:,t)=imdilate(LStotal_temp,(De<=1));
 %//////////////////////////////////////////////////////////////////
 
 end
