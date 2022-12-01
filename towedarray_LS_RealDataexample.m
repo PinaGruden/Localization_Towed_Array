@@ -185,7 +185,7 @@ for t=1:Ntsteps % for each time step compute LS
 
         if any(count==plotf)
             figure,hold on
-            LStotal_temp=reshape(LS_select(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+            LStotal_temp=reshape(LS_select(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
             s=pcolor(X,Y,LStotal_temp);
             s.EdgeColor='none';
             clim([0,1])
@@ -203,7 +203,7 @@ end
 
 % ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
 LStotal_temp=prod(LS_select,3,'omitnan');
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_x,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 figure; hold on;
 s=pcolor(X,Y,LStotal);
 s.EdgeColor='none';
