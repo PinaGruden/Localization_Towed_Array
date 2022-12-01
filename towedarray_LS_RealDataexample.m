@@ -54,7 +54,7 @@ timestep = parameters.dt; % how much time elapses in each time step in s
 
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-xrange=[0,4000]; % x range in m
+xrange=[0,5000]; % x range in m
 yrange=[0,4000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
@@ -133,11 +133,12 @@ end
 % ////////// Simulate Boat movement and Hydrophone positions ///////////
 
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
 boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
-Nsensors=size(hyph_pos,1);
+
 
 %% /////////////////////Compute Ambiguity Surfaces///////////////////
 
