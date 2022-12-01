@@ -41,9 +41,9 @@ end
 %//////////////////// SET parameters //////////////////// 
 
 %-------- Parameters for Ambiguity surface computation -------------
-sig =0.008; %Determine sigma (standard deviation) for the Gaussian
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian
 %sig=0.0024; % From Yvonnes paper
-sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
+sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
 %--------  Parameters for the boat and array simulation ----------------  
@@ -54,8 +54,8 @@ timestep = parameters.dt; % how much time elapses in each time step in s
 
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-xrange=[0,5000]; % x range in m
-yrange=[0,4000]; % y range in m
+xrange=[0,4000]; % x range in m
+yrange=[0,5000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -161,6 +161,7 @@ tdoa_measured_select(all(isnan(tdoa_measured(SelectedTracks,:)),1)) = NaN;
 %------------- Compute the Surface --------------
 % Pre-allocate
 LS_select= nan(1,N,Ntsteps);
+LS_Hyperbolas = LS_select;
 
 count=1; plotf=0;
 for t=1:Ntsteps % for each time step compute LS
@@ -181,8 +182,10 @@ for t=1:Ntsteps % for each time step compute LS
                 (rp(ip2,3)-wpos(wpi,3))^2);
             tdoa_model(wpi) = dt1-dt2;
         end
-
-        LS_select(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2);
+        
+        tdoa_diff=(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2;
+        LS_select(:,:,t)= exp(-1/(2*sig^2).*tdoa_diff);
+        LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*tdoa_diff);
 
         if any(count==plotf)
             figure,hold on
@@ -218,4 +221,21 @@ title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
 legend('Ambiguity Surface','Boat track')
 xlim([xrange(1),xrange(2)])
 ylim([yrange(1),yrange(2)])
+set(gca,'FontSize',16)
+
+%~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
+LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3,'omitnan');
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_y,Ngp_x,Ngp_z]);
+figure;
+s=pcolor(X,Y,LStotal_hyperbolas); hold on
+% set(gca,'YDir', 'normal');
+s.EdgeColor='none';
+clim([0,1])
+colorbar
+axis equal
+hph=1;
+plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+xlabel(' x (m)'),ylabel('y (m)')
+legend('Intesecting hyperbolas', 'Boat track', 'True whale position')
+title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
 set(gca,'FontSize',16)
