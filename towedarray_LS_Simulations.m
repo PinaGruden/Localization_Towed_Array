@@ -111,7 +111,7 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(t)).^2);
 LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*(tdoa_model-tdoa_measured(t)).^2);
 
 %PLOT Ambiguity Surface at time t
-LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_temp=reshape(LS(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
 subplot(1,Ntsteps,t)
 s=pcolor(X,Y,LStotal_temp); hold on
 s.EdgeColor='none';
@@ -132,7 +132,7 @@ set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
 %~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LS,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig2=figure; hold on,
 s=pcolor(X,Y,LStotal); 
 s.EdgeColor='none';
@@ -149,7 +149,7 @@ fontsize(fig2,14,'points')
 
 %~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
 LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3);
-LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig3=figure;
 s=pcolor(X,Y,LStotal_hyperbolas); hold on
 s.EdgeColor='none';
@@ -292,7 +292,7 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(t)).^2);
 LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*(tdoa_model-tdoa_measured(t)).^2);
 
 %PLOT Ambiguity Surface at time t
-LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_temp=reshape(LS(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
 subplot(1,Ntsteps,t)
 s=pcolor(X,Y,LStotal_temp); hold on
 s.EdgeColor='none';
@@ -313,7 +313,7 @@ set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
 %~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LS,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig2=figure; hold on,
 s=pcolor(X,Y,LStotal); 
 s.EdgeColor='none';
@@ -330,7 +330,7 @@ fontsize(fig2,14,'points')
 
 %~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
 LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3);
-LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig3=figure;
 s=pcolor(X,Y,LStotal_hyperbolas); hold on
 s.EdgeColor='none';
@@ -397,7 +397,7 @@ timestep = 10; % how much time elapses in each time step in s
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
 xrange=[-300,300]; % x range in m
-yrange=[-300,300]; % y range in m
+yrange=[-50,300]; % y range in m
 dx=5; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -433,12 +433,12 @@ true_tdoa=zeros(Nsources,Ntsteps);
 ip1=1;ip2=2;
 for t=1:Ntsteps
     rp=hyph_pos(:,:,t);
-    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(:,1)).^2 + ...
-        (rp(ip1,2)-true_wpos(:,2)).^2 + ...
-        (rp(ip1,3)-true_wpos(:,3)).^2);
-    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(:,1)).^2 + ...
-        (rp(ip2,2)-true_wpos(:,2)).^2 + ...
-        (rp(ip2,3)-true_wpos(:,3)).^2);
+    dt1 = 1/c*sqrt((rp(ip1,1)-true_wpos(t,1)).^2 + ...
+        (rp(ip1,2)-true_wpos(t,2)).^2 + ...
+        (rp(ip1,3)-true_wpos(t,3)).^2);
+    dt2 = 1/c*sqrt((rp(ip2,1)-true_wpos(t,1)).^2 + ...
+        (rp(ip2,2)-true_wpos(t,2)).^2 + ...
+        (rp(ip2,3)-true_wpos(t,3)).^2);
     true_tdoa(:,t) = dt1-dt2;
 end
 
@@ -470,7 +470,8 @@ tstep90=tsteps(ind);
 %Pre-allocate:
 LS=nan(Nsources,N,Ntsteps); 
 LS_Hyperbolas = LS;
-LSdilate = nan(Ngp_x,Ngp_y,Ntsteps);
+LSdilate = nan(Ngp_y,Ngp_x,Ntsteps); %swap x and y inpuput arguments since 
+% reshape() will be used to fill in the values
 fig1=figure; hfig1=cell(1,Ntsteps);
 
 for t=1:Ntsteps % for each time step compute LS
@@ -496,7 +497,9 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(t)).^2);
 LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*(tdoa_model-tdoa_measured(t)).^2);
 
 % PLOT Ambiguity Surface at time t (without surface dilation)
-LStotal_temp=reshape(LS(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_temp=reshape(LS(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
+%NOTE: reshape(A,[2,3]) reshapes A into a 2-by-3 matrix - 
+% reshape(A,[rows,columns])- i.e. reshape(A,[y,x]);
 hfig1{t}=subplot(1,Ntsteps,t,'Parent', fig1); hold on;
 pcolor(hfig1{t},X,Y,LStotal_temp); 
 clim([0,1])
@@ -515,20 +518,22 @@ hold off
 
 dt90 = timestep*abs(t-tstep90); %Elapsed time from when animals are at 90deg (0 tdoa) [s]
 if dt90==0
-dt90=2;
+
+    LSdilate(:,:,t)=LStotal_temp; %do not dilate if animal is at the beam (the tdoas should be correct)
+
+else
+    mdwh=dt90*mean_horiz_swimspeed; %maximum distance whale could have travelled horizontally [m]
+
+    %gridpoints for filter in x (and also y since the same assumptions re swim speed and grid space)
+    xgridf=0:dx:(mdwh+dx);
+    filt_x_grid = [-fliplr(xgridf(2:end)),xgridf];
+    ygridf=0:dy:(mdwh+dy);
+    filt_y_grid = [-fliplr(ygridf(2:end)),ygridf];
+    [Fx,Fy] = meshgrid(filt_x_grid,filt_y_grid);
+    De = sqrt(Fx.^2+Fy.^2)/mdwh; %normalize to max distance that the whale could have swam (feasible distance will be 1 or lower)
+
+    LSdilate(:,:,t)=imdilate(LStotal_temp,(De<=1));
 end
-mdwh=dt90*mean_horiz_swimspeed; %maximum distance whale could have travelled horizontally [m]
-
-%gridpoints for filter in x (and also y since the same assumptions re swim speed and grid space)
-xgridf=0:dx:(mdwh+dx);
-filt_x_grid = [-fliplr(xgridf(2:end)),xgridf];
-ygridf=0:dy:(mdwh+dx);
-filt_y_grid = [-fliplr(ygridf(2:end)),ygridf];
-[Fx,Fy] = meshgrid(filt_x_grid,filt_y_grid);
-De = Fx.^2/mdwh^2 + Fy.^2/mdwh^2; %normalize to max distance that the whale could have swam (feasible distance will be 1 or lower/ or is it 2 or lower??)
-%F = zeros(size(De)); F((De <=1)) = 1;
-
-LSdilate(:,:,t)=imdilate(LStotal_temp,(De<=1));
 %//////////////////////////////////////////////////////////////////
 
 end
@@ -538,7 +543,7 @@ set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
 % ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~~
 LStotal_temp=prod(LS,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig2=figure; hold on,
 pcolor(X,Y,LStotal);
 clim([0,1])
@@ -602,7 +607,7 @@ fontsize(fig4,14,'points')
 
 %~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
 LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3);
-LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_y,Ngp_x,Ngp_z]);
 fig5=figure;
 pcolor(X,Y,LStotal_hyperbolas); hold on
 set(gca,'YDir', 'normal');
@@ -795,7 +800,7 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
             LS_temp(count,:)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(count,t)).^2);
             
 
-            LStotal_temp=reshape(LS_temp(count,:),[Ngp_x,Ngp_y,Ngp_z]);
+            LStotal_temp=reshape(LS_temp(count,:),[Ngp_y,Ngp_x,Ngp_z]);
             subplot(1,Nsensors,count)
             s=pcolor(X,Y,LStotal_temp); hold on
             s.EdgeColor='none';
@@ -818,7 +823,7 @@ for t=1:Ntsteps % for each time step compute LS (should be a product of LSs for 
     set(fig1, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
     LStotal_tstep(:,:,t) = prod(LS_temp);
-    LStotal_tstep_temp=reshape(LStotal_tstep(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+    LStotal_tstep_temp=reshape(LStotal_tstep(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
     fig2=figure;
     s=pcolor(X,Y,LStotal_tstep_temp); hold on
     s.EdgeColor='none';
@@ -838,7 +843,7 @@ end
 
 %~~~~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface~~~~~~~~~~~~~~~~~~~
 LStotal_temp=prod(LStotal_tstep,3);
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_y,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 h=figure; hold on;
 s=pcolor(X,Y,LStotal);
 s.EdgeColor='none';
@@ -984,7 +989,7 @@ LS(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-tdoa_measured(:,t)).^2);
 %PLOT Ambiguity Surface for each source at time t
 figure,hold on
 for n=1:Nsources
-LStotal_temp=reshape(LS(n,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+LStotal_temp=reshape(LS(n,:,t),[Ngp_y,Ngp_x,Ngp_z]);
 subplot(1,Nsources,n)
 s=pcolor(X,Y,LStotal_temp); hold on
 s.EdgeColor='none';
@@ -1008,7 +1013,7 @@ end
 LStotal_temp=prod(LS,3);
 figure, hold on
 for n=1:Nsources
-    LStotal=reshape(LStotal_temp(n,:),[Ngp_x,Ngp_y,Ngp_z]);
+    LStotal=reshape(LStotal_temp(n,:),[Ngp_y,Ngp_x,Ngp_z]);
     subplot(1,Nsources,n)
     s=pcolor(X,Y,LStotal);hold on
     s.EdgeColor='none';
@@ -1032,7 +1037,7 @@ for m=1:Nsources
     disp('--------------------------- ')
     fprintf('Source %.0f \n',m)
 
-LStotal=reshape(LStotal_temp(m,:),[Ngp_x,Ngp_y,Ngp_z]);   
+LStotal=reshape(LStotal_temp(m,:),[Ngp_y,Ngp_x,Ngp_z]);   
 [peakdata] =findpeaks2D(X,Y,LStotal);
 fprintf(['True whale end location is: [', repmat('%g, ', 1, numel(true_wpos(m,:))-1), '%g]\n'],true_wpos(m,:))
 %take just one of the estimated peaks (the other is mirror image)

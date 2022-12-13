@@ -2,6 +2,8 @@
  
  This repo contains code for the localization with ambiguity surfaces for towed array data.
  
+ It is developed with Matlab version 2022a. (if using older versions commands clim and FontSize for plotting do not exist)
+ 
  ## How to use
  
  1. Use *towedarray_LS_Simulations.m* for Simulation scenarios. Available simulations:

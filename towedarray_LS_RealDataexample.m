@@ -6,13 +6,21 @@
 % tracks ambiguity surfaces are computed and localizations made. Note, boat
 % track and hydrophone positions are simulated.
 
-%Test
-clear,close all
 
+% Make sure you have first run TDOA tracking package ("TDOA_tracking_master") to extract TDOA tracks
+% Also make sure you have extracted data from Pamguard sql database with
+% "Extract_Pamguard_detections" package
+
+clear,close all
 
 % /////////////////// ADD PATHS and EXTRACTED TRACKS: ////////////////////
 % Add path for plotting- change to reflect your path to the TDOA tracking package:
 addpath('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_master'); 
+
+% Load all Pamguard tdoas from detected whistles and clicks
+load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Ground_truth_fromJenn/Lasker_AC109/Lasker_AC109_Extracted_AnnotatedClicks.mat')
+load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Ground_truth_fromJenn/Lasker_AC109/Lasker_AC109_Extracted_AnnotatedWhistles.mat')
+pamguard_parameters=parameters;
 
 % Load data/tracks extracted by the TDOA tracking package:
 load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/LocalizationTest/LaskerAC109_Results/Lasker_AC109_Results.mat')
@@ -23,13 +31,20 @@ load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/Loc
     'Rxy_envelope_ALL','lags','t_serialdate')
 Rxy_envelope_both{2}=Rxy_envelope_ALL.*scalar_whistles;
 
+% Check that the TDOA tracking and Pamguard used the same sensor
+% separation:
+if ~isequal(parameters.d,pamguard_parameters.d)
+    error(['The sensor spacing between TDOA tracking and Pamguard detections' ...
+        ' does not match. Re-check sensor separation and compute TDOAs for' ...
+        ' Pamguard for the sensor separation that matches parameters.d.'])
+end
 
 %//////////////////// SET parameters //////////////////// 
 
 %-------- Parameters for Ambiguity surface computation -------------
-sig =0.008; %Determine sigma (standard deviation) for the Gaussian
+sig =0.003; %Determine sigma (standard deviation) for the Gaussian
 %sig=0.0024; % From Yvonnes paper
-sig_hyperbolas = 0.0003; % STD for plotting intersecting hyperbolas
+sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
 %--------  Parameters for the boat and array simulation ----------------  
@@ -41,7 +56,7 @@ timestep = parameters.dt; % how much time elapses in each time step in s
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
 xrange=[0,4000]; % x range in m
-yrange=[0,4000]; % y range in m
+yrange=[0,5000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -84,6 +99,7 @@ Ntsteps=numel(timevec); %number of time steps
 
 
 %---------------3. PLOT All tracks and selected:------------------
+% a) Plot against cross-correlogram
 parameters.saveplotsofresults=0;
 measure.T=0;
 plot_results(t_serialdate,lags,Rxy_envelope_both,measure,Tracks, parameters)
@@ -92,6 +108,20 @@ for k=1:Nsources
 text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1),num2str(k),'Color','r')
 end
 
+% b) Plot against all Pamguard detections
+figure,hold on;
+plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
+    'Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3)
+plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
+for k=1:size(Tracks,2)
+plot(Tracks(k).time_local, Tracks(k).tdoa,'-','LineWidth',4), hold on
+end
+set(gca,'YDir', 'reverse');
+datetick('x','keeplimits');
+xlim([t_serialdate(1),t_serialdate(end)])
+for k=1:Nsources
+text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1),num2str(k),'Color','r')
+end
 
 %---------- 4. Re-arrange tracks in a matrix (Nsources x Ntsteps)--------
 tdoa_measured= nan(Nsources,Ntsteps);
@@ -104,11 +134,12 @@ end
 % ////////// Simulate Boat movement and Hydrophone positions ///////////
 
 hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+Nsensors=size(hyph_pos,1);
 boatmove = boatspeed*timestep;
 for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+[boatmove,0,0;boatmove,0,0];
+hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
 end
-Nsensors=size(hyph_pos,1);
+
 
 %% /////////////////////Compute Ambiguity Surfaces///////////////////
 
@@ -116,7 +147,7 @@ Nsensors=size(hyph_pos,1);
 prompt = "Which track/tracks you want to compute the ambiguity surface for? \n" + ...
     " Note, enter a single track number or if track is fragmented, \n " + ...
     "then enter fragments as a 1xN vector. \n " + ...
-    "Look at Figure 2 for track numbers. \n ";
+    "Look at Figure 2 and Figure 4 for track numbers. \n ";
 
 SelectedTracks =input(prompt);
 selected_indx=zeros(length(SelectedTracks),length(timevec));
@@ -131,6 +162,7 @@ tdoa_measured_select(all(isnan(tdoa_measured(SelectedTracks,:)),1)) = NaN;
 %------------- Compute the Surface --------------
 % Pre-allocate
 LS_select= nan(1,N,Ntsteps);
+LS_Hyperbolas = LS_select;
 
 count=1; plotf=0;
 for t=1:Ntsteps % for each time step compute LS
@@ -151,12 +183,14 @@ for t=1:Ntsteps % for each time step compute LS
                 (rp(ip2,3)-wpos(wpi,3))^2);
             tdoa_model(wpi) = dt1-dt2;
         end
-
-        LS_select(:,:,t)= exp(-1/(2*sig^2).*(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2);
+        
+        tdoa_diff=(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2;
+        LS_select(:,:,t)= exp(-1/(2*sig^2).*tdoa_diff);
+        LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*tdoa_diff);
 
         if any(count==plotf)
             figure,hold on
-            LStotal_temp=reshape(LS_select(:,:,t),[Ngp_x,Ngp_y,Ngp_z]);
+            LStotal_temp=reshape(LS_select(:,:,t),[Ngp_y,Ngp_x,Ngp_z]);
             s=pcolor(X,Y,LStotal_temp);
             s.EdgeColor='none';
             clim([0,1])
@@ -174,7 +208,7 @@ end
 
 % ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
 LStotal_temp=prod(LS_select,3,'omitnan');
-LStotal=reshape(LStotal_temp,[Ngp_x,Ngp_x,Ngp_z]);
+LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 figure; hold on;
 s=pcolor(X,Y,LStotal);
 s.EdgeColor='none';
@@ -188,4 +222,21 @@ title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
 legend('Ambiguity Surface','Boat track')
 xlim([xrange(1),xrange(2)])
 ylim([yrange(1),yrange(2)])
+set(gca,'FontSize',16)
+
+%~~~~~~~~~~~~~~~~~~~PLOT Intersecting Hyperbolas~~~~~~~~~~~~~~~~~~~
+LStotal_hyperbolas_temp = sum(LS_Hyperbolas,3,'omitnan');
+LStotal_hyperbolas = reshape(LStotal_hyperbolas_temp,[Ngp_y,Ngp_x,Ngp_z]);
+figure;
+s=pcolor(X,Y,LStotal_hyperbolas); hold on
+% set(gca,'YDir', 'normal');
+s.EdgeColor='none';
+clim([0,1])
+colorbar
+axis equal
+hph=1;
+plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+xlabel(' x (m)'),ylabel('y (m)')
+legend('Intesecting hyperbolas', 'Boat track')
+title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
 set(gca,'FontSize',16)
