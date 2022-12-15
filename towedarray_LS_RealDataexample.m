@@ -64,8 +64,8 @@ switch get_hyph_pos
 end
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-xrange=[-4000,4000]; % x range in m
-yrange=[-5000,500]; % y range in m
+xrange=[-1000,4000]; % x range in m
+yrange=[-4000,4000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -207,7 +207,7 @@ for t=1:Ntsteps % for each time step compute LS
             tdoa_model(wpi) = dt1-dt2;
         end
         
-        tdoa_diff=(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2;
+        tdoa_diff=(tdoa_model-(tdoa_measured_select(:,t))).^2;
         LS_select(:,:,t)= exp(-1/(2*sig^2).*tdoa_diff);
         LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*tdoa_diff);
 
@@ -229,7 +229,7 @@ for t=1:Ntsteps % for each time step compute LS
     end
 end
 
-% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
+%% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
 LStotal_temp=prod(LS_select,3,'omitnan');
 LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 figure; hold on;
@@ -239,10 +239,12 @@ clim([0,1])
 colorbar
 axis equal
 hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
+%plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
 xlabel(' x (m)'),ylabel('y (m)')
 title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
-legend('Ambiguity Surface','Boat track')
+legend('Ambiguity Surface',['Sensor ', num2str(hph),' position'],'Boat track')
 xlim([xrange(1),xrange(2)])
 ylim([yrange(1),yrange(2)])
 set(gca,'FontSize',16)
@@ -258,8 +260,12 @@ clim([0,1])
 colorbar
 axis equal
 hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
+%plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
 xlabel(' x (m)'),ylabel('y (m)')
-legend('Intesecting hyperbolas', 'Boat track')
+legend('Intesecting hyperbolas',['Sensor ', num2str(hph),' position'], 'Boat track')
 title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
+xlim([xrange(1),xrange(2)])
+ylim([yrange(1),yrange(2)])
 set(gca,'FontSize',16)
