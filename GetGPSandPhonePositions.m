@@ -1,10 +1,11 @@
+function [GPSandPosition_table]=GetGPSandPhonePositions
 % LOAD and Prepare GPS data and corresponding Hydrophone positions
 
 % Load appropriate table containing GPS data
-gps_data=readtable('AllLasker_gpsData.csv');
+gps_data=readtable('/Users/pinagruden/Dropbox/Pina/HAWAII/Updated_Database_NOAA_FKW/AllLasker_gpsData.csv');
 
 % Load appropriate table containing Depth data
-depth_data=readtable('AllLasker_Hydrophone_Depth_Data.csv');
+depth_data=readtable('/Users/pinagruden/Dropbox/Pina/HAWAII/Updated_Database_NOAA_FKW/AllLasker_Hydrophone_Depth_Data.csv');
 
 % Load table containing Array data:
 array_data=readtable('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_master/Array_Info.csv');
@@ -12,16 +13,18 @@ array_data=readtable('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_
 % Load extracted TDOA tracks (to get the times)
 load(['/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/' ...
     'Tracking_Towed_Array/LocalizationTest/LaskerAC109_Results/' ...
-    'Lasker_AC109_Results.mat', 'Tracks','parameters'])
+    'Lasker_AC109_Results.mat'], 'Tracks','parameters')
 
 % Load timevector (from cross-correlograms):
 load(['/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/' ...
     'Tracking_Towed_Array/LocalizationTest/LaskerAC109_Raw_CrossCorrelogram/' ...
     'Lasker_AC109_clicks_rawCrossCorrelogram_ALL.mat'],...
     't_serialdate')
+t_serialdate=t_serialdate(:);
 
 % datetime array format of times:
 Time_UTC=datetime(t_serialdate,'convertfrom','datenum','Format','dd-MMM-yyyy HH:mm:ss.SSS');
+Time_UTC=Time_UTC(:);
 
 % Get min and max time for the encounter:
 tmin = min([Tracks.time_local]); %Tracks.time_local is in datenum format
@@ -60,14 +63,31 @@ d_s1_m =d_boat_m + array_data{strcmp(array_data.Array_name,parameters.arrayname)
  %second sensor distance behind boat:
 d_s2_m = d_s1_m + parameters.d; % parameters.d = sensor separation
 
-%TO DO get relative sensor positions
+%Get relative sensor positions
+d_xy = sqrt((x(2:end)-x(1:end-1)).^2+(y(2:end)-y(1:end-1)).^2);
+%sensor 1 coordinates:
+x_s1 = x(2:end) + d_s1_m.*(x(1:end-1)-x(2:end))./d_xy;
+x_s1 = [0;x_s1];
+y_s1 = y(2:end) + d_s1_m.*(y(1:end-1)-y(2:end))./d_xy;
+y_s1 = [0;y_s1];
+%sensor 2 coordinates:
+x_s2 = x(2:end) + d_s2_m.*(x(1:end-1)-x(2:end))./d_xy;
+x_s2 = [0;x_s2];
+y_s2 = y(2:end) + d_s2_m.*(y(1:end-1)-y(2:end))./d_xy;
+y_s2 = [0;y_s2];
+% This gets the sensor positions oscillating a bit around the boat
+% trajectory. Maybe need to take longer steps than one to another to
+% smooth a bit??
 
 
 
 % Create a Table
 GPSandPosition_table = table(t_serialdate, Time_UTC,...
-    interp_lat,interp_long,x,y, ...
+    interp_lat,interp_long,x,y,x_s1, y_s1, interp_depth_s1,x_s2, y_s2,interp_depth_s2, ...
     'VariableNames',{'Time_datenum','Time_UTC','Boat_Latitude','Boat_Longitude', ...
-    'Boat_pos_x_m','Boat_pos_y_m'});
+    'Boat_pos_x_m','Boat_pos_y_m', 'Sensor1_pos_x_m','Sensor1_pos_y_m','Sensor1_pos_z_m', ...
+    'Sensor2_pos_x_m','Sensor2_pos_y_m','Sensor2_pos_z_m'});
+% save
+writetable(GPSandPosition_table,'GPSandPosition_table.csv')
 
-
+end

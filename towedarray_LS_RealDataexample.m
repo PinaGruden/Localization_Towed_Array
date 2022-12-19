@@ -11,7 +11,7 @@
 % Also make sure you have extracted data from Pamguard sql database with
 % "Extract_Pamguard_detections" package
 
-clear,close all
+%clear,close all
 
 % /////////////////// ADD PATHS and EXTRACTED TRACKS: ////////////////////
 % Add path for plotting- change to reflect your path to the TDOA tracking package:
@@ -39,7 +39,7 @@ if ~isequal(parameters.d,pamguard_parameters.d)
         ' Pamguard for the sensor separation that matches parameters.d.'])
 end
 
-%//////////////////// SET parameters //////////////////// 
+%% //////////////////// SET parameters //////////////////// 
 
 %-------- Parameters for Ambiguity surface computation -------------
 sig =0.003; %Determine sigma (standard deviation) for the Gaussian
@@ -47,16 +47,25 @@ sig =0.003; %Determine sigma (standard deviation) for the Gaussian
 sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 %(for visual assesment of how they are crossing)- needs to be small
 
-%--------  Parameters for the boat and array simulation ----------------  
-d=parameters.d; %distance between sensors
-boatspeed_kts = 10; % boat speed in knots
-boatspeed= boatspeed_kts/1.944; %boat speed in m/s
-timestep = parameters.dt; % how much time elapses in each time step in s
+%--------  Parameters for the boat and array  ---------------- 
+% Choose either: 
+% hyph_pos = 1 to simulate boat movement and hydrophone positions
+% hyph_pos = 2 to use the real data
 
+get_hyph_pos = 2; 
+switch get_hyph_pos
+    case 1
+        d=parameters.d; %distance between sensors
+        boatspeed_kts = 10; % boat speed in knots
+        boatspeed= boatspeed_kts/1.944; %boat speed in m/s
+        timestep = parameters.dt; % how much time elapses in each time step in s
+    case 2
+       GPSandPosition_table=readtable('GPSandPosition_table.csv'); 
+end
 %--------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-xrange=[0,4000]; % x range in m
-yrange=[0,5000]; % y range in m
+xrange=[-1000,4000]; % x range in m
+yrange=[-4000,4000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
@@ -131,13 +140,27 @@ for k=1:Nsources
 end
 
 
-% ////////// Simulate Boat movement and Hydrophone positions ///////////
+% ////////// Get Hydrophone positions ///////////
 
-hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
-Nsensors=size(hyph_pos,1);
-boatmove = boatspeed*timestep;
-for t=2:Ntsteps
-hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
+switch get_hyph_pos
+    case 1
+        % Simulate Boat movement and Hydrophone positions
+        hyph_pos(:,:,1)=[0,0,0;d,0,0]; %[x1,y1,z1; x2,y2,z2];
+        Nsensors=size(hyph_pos,1);
+        boatmove = boatspeed*timestep;
+        for t=2:Ntsteps
+            hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([boatmove,0,0],Nsensors,1);
+        end
+    case 2
+        % Get Hydrophone positions from data
+         hyph_pos=nan(2,3,Ntsteps);
+        for t=1:Ntsteps
+            hyph_pos(:,:,t)= [GPSandPosition_table.Sensor1_pos_x_m(t),...
+                GPSandPosition_table.Sensor1_pos_y_m(t),0;...
+                GPSandPosition_table.Sensor2_pos_x_m(t),...
+                GPSandPosition_table.Sensor2_pos_y_m(t),0]; %[x1,y1,z1; x2,y2,z2];
+        end
+
 end
 
 
@@ -184,7 +207,7 @@ for t=1:Ntsteps % for each time step compute LS
             tdoa_model(wpi) = dt1-dt2;
         end
         
-        tdoa_diff=(tdoa_model-(-1.*tdoa_measured_select(:,t))).^2;
+        tdoa_diff=(tdoa_model-(tdoa_measured_select(:,t))).^2;
         LS_select(:,:,t)= exp(-1/(2*sig^2).*tdoa_diff);
         LS_Hyperbolas(:,:,t)= exp(-1/(2*sig_hyperbolas^2).*tdoa_diff);
 
@@ -206,7 +229,7 @@ for t=1:Ntsteps % for each time step compute LS
     end
 end
 
-% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
+%% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
 LStotal_temp=prod(LS_select,3,'omitnan');
 LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x,Ngp_z]);
 figure; hold on;
@@ -216,10 +239,12 @@ clim([0,1])
 colorbar
 axis equal
 hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
+%plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
 xlabel(' x (m)'),ylabel('y (m)')
 title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
-legend('Ambiguity Surface','Boat track')
+legend('Ambiguity Surface',['Sensor ', num2str(hph),' position'],'Boat track')
 xlim([xrange(1),xrange(2)])
 ylim([yrange(1),yrange(2)])
 set(gca,'FontSize',16)
@@ -235,8 +260,12 @@ clim([0,1])
 colorbar
 axis equal
 hph=1;
-plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
+%plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
+plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
 xlabel(' x (m)'),ylabel('y (m)')
-legend('Intesecting hyperbolas', 'Boat track')
+legend('Intesecting hyperbolas',['Sensor ', num2str(hph),' position'], 'Boat track')
 title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
+xlim([xrange(1),xrange(2)])
+ylim([yrange(1),yrange(2)])
 set(gca,'FontSize',16)
