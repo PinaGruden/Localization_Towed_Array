@@ -59,6 +59,10 @@ switch get_hyph_pos
         boatspeed_kts = 10; % boat speed in knots
         boatspeed= boatspeed_kts/1.944; %boat speed in m/s
         timestep = parameters.dt; % how much time elapses in each time step in s
+        %specify line gradient and intersect along which the boat moves:
+        mb=-0.5; % line gradient
+        b=10; %intersect with y axis
+        
     case 2
        GPSandPosition_table=readtable('GPSandPosition_table.csv'); 
 end
@@ -144,12 +148,24 @@ clear hyph_pos
 switch get_hyph_pos
     case 1
         % Simulate Boat movement and Hydrophone positions
-        hyph_pos(:,:,1)=[-300,60;-300-d,60]; %[x1,y1; x2,y2];
-        Nsensors=size(hyph_pos,1);
-        boatmove = boatspeed*timestep;
-        for t=2:Ntsteps
-            hyph_pos(:,:,t)=hyph_pos(:,:,t-1)+ repmat([0,-boatmove],Nsensors,1);
-        end
+        % get boat positions along the specified line:
+        x_line=0:1:Ntsteps+1;
+        y_line=mb.*x_line+b;
+        dxy_line=sqrt((x_line(2)-x_line(1))^2+(y_line(2)-y_line(1))^2);
+
+        boatmove_m = boatspeed*timestep; %distance the boat traveles in one time step
+        x_boat= x_line(1:end-1) + boatmove_m.*(x_line(2:end)-x_line(1:end-1))./dxy_line;
+        y_boat=mb.*x_boat+b;
+
+        hyph_pos=nan(2,2,Ntsteps);%[x1,y1; x2,y2];
+        %first sensor is at the position of the boat
+        hyph_pos(1,1,:)=x_boat(1:end-1);
+        hyph_pos(1,2,:)=y_boat(1:end-1);
+        %second sensor is distance d behind first
+        %hyph_pos(2,1,:)=hyph_pos(1,1,1:end-1) - d.*(hyph_pos(1,1,2:end)-hyph_pos(1,1,1:end-1))./dxy_line;
+        hyph_pos(2,1,:)=x_boat(1:end-1) - d.*(x_boat(2:end)-x_boat(1:end-1))./dxy_line;
+        hyph_pos(2,2,:)=mb.*hyph_pos(2,1,:)+b;
+
     case 2
         % Get Hydrophone positions from data
          hyph_pos=nan(2,2,Ntsteps);
@@ -234,7 +250,12 @@ axis equal
 hph=1;
 plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
 %plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
-plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
+switch get_hyph_pos
+    case 1
+        plot(x_boat, y_boat,'g-','Linewidth', 1.5)
+    case 2
+        plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
+end
 xlabel(' x (m)'),ylabel('y (m)')
 title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
 legend('Ambiguity Surface',['Sensor ', num2str(hph),' position'],'Boat track')
@@ -255,7 +276,12 @@ axis equal
 hph=1;
 plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
 %plot([hyph_pos(hph,1,1),hyph_pos(hph,1,end)],[hyph_pos(hph,2,1),hyph_pos(hph,2,end)],'r-', 'Linewidth', 3),hold on
-plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
+switch get_hyph_pos
+    case 1
+        plot(x_boat, y_boat,'g-','Linewidth', 1.5)
+    case 2
+        plot(GPSandPosition_table.Boat_pos_x_m, GPSandPosition_table.Boat_pos_y_m,'g-','Linewidth', 1.5)
+end
 xlabel(' x (m)'),ylabel('y (m)')
 legend('Intesecting hyperbolas',['Sensor ', num2str(hph),' position'], 'Boat track')
 title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
