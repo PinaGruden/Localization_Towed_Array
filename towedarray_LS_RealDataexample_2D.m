@@ -56,7 +56,7 @@ mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whale) [m/s]
 get_hyph_pos = 2; 
 switch get_hyph_pos
     case 1
-        d=parameters.d; %distance between sensors
+        %d=parameters.d; %distance between sensors
         boatspeed_kts = 10; % boat speed in knots
         boatspeed= boatspeed_kts/1.944; %boat speed in m/s
         timestep = parameters.dt; % how much time elapses in each time step in s
@@ -75,7 +75,7 @@ yrange=[-4000,4000]; % y range in m
 dx=10; % grid step size in m (resolution) in x direction
 dy=dx;% grid step size in m (resolution) in y direction
 % - Speed of sound
-c=1500;
+%c=1500;
 
 
 %////////////////////Create a grid for surface evaluation//////////////////
@@ -165,7 +165,7 @@ switch get_hyph_pos
         hyph_pos(1,2,:)=y_boat(1:end-1);
         %second sensor is distance d behind first
         %hyph_pos(2,1,:)=hyph_pos(1,1,1:end-1) - d.*(hyph_pos(1,1,2:end)-hyph_pos(1,1,1:end-1))./dxy_line;
-        hyph_pos(2,1,:)=x_boat(1:end-1) - d.*(x_boat(2:end)-x_boat(1:end-1))./dxy_line;
+        hyph_pos(2,1,:)=x_boat(1:end-1) - parameters.d.*(x_boat(2:end)-x_boat(1:end-1))./dxy_line;
         hyph_pos(2,2,:)=mb.*hyph_pos(2,1,:)+b;
 
     case 2
@@ -212,6 +212,7 @@ LS_Hyperbolas = LS_select;
 LSdilate = nan(Ngp_y,Ngp_x,Ntsteps); %swap x and y inpuput arguments since 
 % reshape() will be used to fill in the values
 
+tic
 count=1; plotf=0;
 for t=1:Ntsteps % for each time step compute LS
     if selected_indx(t)
@@ -222,8 +223,8 @@ for t=1:Ntsteps % for each time step compute LS
         % hyph 1 and position wpos(wpi)), dt2 (between hyph2 and position wpos(wpi)), then
         % tdoa_model is tdoa between the hyph1 and hyph2 if the source
         % is at wpos(wpi).
-        dt1= 1/c.*sqrt((rp(ip1,1)-wpos(:,1)).^2 +(rp(ip1,2)-wpos(:,2)).^2);
-        dt2= 1/c.*sqrt((rp(ip2,1)-wpos(:,1)).^2 +(rp(ip2,2)-wpos(:,2)).^2);
+        dt1= 1/parameters.c.*sqrt((rp(ip1,1)-wpos(:,1)).^2 +(rp(ip1,2)-wpos(:,2)).^2);
+        dt2= 1/parameters.c.*sqrt((rp(ip2,1)-wpos(:,1)).^2 +(rp(ip2,2)-wpos(:,2)).^2);
         tdoa_model=dt1-dt2;
 
         tdoa_diff=(tdoa_model-(tdoa_measured_select(:,t))).^2;
@@ -271,7 +272,7 @@ for t=1:Ntsteps % for each time step compute LS
 
     end
 end
-
+toc
 %% ~~~~~~~~~~~~~~~~PLOT final Ambiguity Surface without Dilation~~~~~~~~~~~~
 LStotal_temp=prod(LS_select,3,'omitnan');
 LStotal=reshape(LStotal_temp,[Ngp_y,Ngp_x]);
