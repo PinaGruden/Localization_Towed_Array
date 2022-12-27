@@ -19,15 +19,29 @@ if ~isempty(folder.pamguard)
     end
 end
 %   ii) Load data/tracks extracted by the TDOA tracking package:
-load([folder.tdoas,'*.mat'],'Tracks','parameters','scalar_clicks','scalar_whistles')
-load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/LocalizationTest/LaskerAC109_Raw_CrossCorrelogram/Lasker_AC109_clicks_rawCrossCorrelogram_ALL.mat',...
-    'Rxy_envelope_ALL')
-Rxy_envelope_both{1}=Rxy_envelope_ALL.*scalar_clicks;
-load('/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Code/Tracking_Towed_Array/LocalizationTest/LaskerAC109_Raw_CrossCorrelogram/Lasker_AC109_whistles_rawCrossCorrelogram_ALL.mat',...
-    'Rxy_envelope_ALL','lags','t_serialdate')
-Rxy_envelope_both{2}=Rxy_envelope_ALL.*scalar_whistles;
+%       Load TDOA tracks:
+files =dir(fullfile(folder.tdoas,'*.mat'));
+for k=1:size(files,1)
+    load([folder.tdoas,files(k).name],'Tracks','parameters','scalar_*')
+end
 
-%   iii) Check that the TDOA tracking and Pamguard used the same sensor 
+%       Load Cross-correlograms for plotting (if available):
+if ~isempty(folder.crosscorr)
+    files =dir(fullfile(folder.crosscorr,'*.mat'));
+    N=size(files,1);
+    Rxy_envelope_both=cell(1,N);
+    for k=1:N
+        load([folder.crosscorr,files(k).name],'Rxy_envelope_ALL','lags','t_serialdate')
+        if ~isempty(strfind(files(k).name,'clicks'))
+            Rxy_envelope_both{k}=Rxy_envelope_ALL.*scalar_clicks;
+        end
+        if ~isempty(strfind(files(k).name,'whistles'))
+            Rxy_envelope_both{k}=Rxy_envelope_ALL.*scalar_whistles;
+        end
+    end
+end
+
+%   iii) Check that the TDOA tracking and Pamguard used the same sensor
 %   separation (if applicable)
 if ~isempty(folder.pamguard)
     if ~isequal(parameters.d,pamguard_parameters.d)
@@ -38,7 +52,9 @@ if ~isempty(folder.pamguard)
 end
 
 %   iv) Load GPS and array info (If available)
-GPSandPosition_table=readtable('GPSandPosition_table.csv');
+if ~isempty(folder.gps)
+    GPSandPosition_table=readtable([folder.gps,'GPSandPosition_table.csv']);
+end
 
 % ---------------------- c) Get paramters: ----------------------
 [AS_params,BA_params] = specify_parameters(parameters);
