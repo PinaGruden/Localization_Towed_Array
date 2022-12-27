@@ -30,7 +30,8 @@ AS_params.mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whal
 % Specify what is the first degrees to be considered around the beam - this
 % will affect which tracks you consider for localization
 AS_params.bearing_cuttof = 60;
-
+bear2tdoa= @(x) cosd(x).*(parameters.d/parameters.c);
+AS_params.tdoa_cutoff = bear2tdoa(AS_params.bearing_cuttof);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~COMPUTED:~~~~~~~~~~~~~~~~~~~~~~~~~~~~
