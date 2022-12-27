@@ -5,33 +5,6 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 
 Nsources=size(Tracks_selected,2);
 
-if ~isempty(folder.pamguard) % Plot against Pamguard detections
-    All_data_c = data_pamguard_c;
-    All_data_w =data_pamguard_w;
-
-    figure,hold on;
-    % Plot Pamguard detections:
-    plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
-        'Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3)
-    plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
-    % Plot All TDOA tracks
-    for k=1:size(Tracks,2)
-        plot(Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
-    end
-    set(gca,'YDir', 'reverse');
-    datetick('x','keeplimits');
-    % Plot Selected TDOA tracks
-    for k=1:Nsources
-        plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
-        text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
-            num2str(k),'FontSize',16,'Color','k')
-    end
-    xlim([t_serialdate(1),t_serialdate(end)])
-    xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-    h(1) = plot(NaN, NaN,'b-','LineWidth',4);
-    h(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-    legend(h,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
-end
 
 if ~isempty(folder.crosscorr) % plot against cross-correlograms
 
@@ -50,7 +23,6 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
             title(['Tracked TDOAs from measurements based on ', parameters.signal_type])
-            set(gca,'FontSize',14)
             caxis([0,10])
             im.AlphaData = 0.5; % change this value to change the background image transparency
             hold all;
@@ -61,7 +33,6 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             colormap(flipud(gray(256)))
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-            set(gca,'FontSize',14)
             caxis([0,10])
             im1.AlphaData = 0.5; % change this value to change the foreground image transparency
             %link axes
@@ -75,23 +46,24 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             %Plot All tracked TDOAs
             hold on
             for k=1:size(Tracks,2)
-                plot(Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
+                plot(ax2,Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
             end
             datetick('x','keeplimits');
 
             % Plot Selected TDOA tracks
+            hold on
             for k=1:Nsources
-                plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
-                text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
+                plot(ax2,Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
+                text(ax2,Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
                     num2str(k),'FontSize',16,'Color','k')
             end
-            xlim([t_serialdate(1),t_serialdate(end)])
 
-            h(1) = plot(NaN, NaN,'b-','LineWidth',4);
-            h(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-            legend(h,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
-            set(gca,'FontSize',14)
-            set(findall(gcf,'type','text'),'FontSize',14)
+            h1(1) = plot(NaN, NaN,'b-','LineWidth',4);
+            h1(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
+            legend(h1,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
+            %             set(gca,'FontSize',14)
+            %             set(findall(gcf,'type','text'),'FontSize',14)
+            hold off
 
         otherwise
 
@@ -122,15 +94,45 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             end
             xlim([t_serialdate(1),t_serialdate(end)])
 
-            h(1) = plot(NaN, NaN,'b-','LineWidth',4);
-            h(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-            legend(h,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
-            set(gca,'FontSize',14)
-            set(findall(gcf,'type','text'),'FontSize',14)
+            h1(1) = plot(NaN, NaN,'b-','LineWidth',4);
+            h1(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
+            legend(h1,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
+            %             set(gca,'FontSize',14)
+            %             set(findall(gcf,'type','text'),'FontSize',14)
+            hold off
 
     end
 
 end
 
+
+if ~isempty(folder.pamguard) % Plot against Pamguard detections
+    All_data_c = data_pamguard_c;
+    All_data_w =data_pamguard_w;
+
+    figure,hold on;
+    % Plot Pamguard detections:
+    plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
+        'Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3)
+    plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
+    % Plot All TDOA tracks
+    for k=1:size(Tracks,2)
+        plot(Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
+    end
+    set(gca,'YDir', 'reverse');
+    datetick('x','keeplimits');
+    % Plot Selected TDOA tracks
+    for k=1:Nsources
+        plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
+        text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
+            num2str(k),'FontSize',16,'Color','k')
+    end
+    xlim([t_serialdate(1),t_serialdate(end)])
+    xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
+    h(1) = plot(NaN, NaN,'b-','LineWidth',4);
+    h(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
+    legend(h,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
+    hold off
+end
 
 end
