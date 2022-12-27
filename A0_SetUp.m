@@ -1,9 +1,16 @@
 % SET UP 
+% This script reads all relevant data into the Matlab workspace, it also
+% selects TDOA tracks and relevant hydrophone positions that will be used
+% to obtain final localizations.
 
-% ///////////////// 1) Get folders, load data, get parameters /////////////
-% CHANGE BELOW - copy over the function to this project & modify 
-% Add path for plotting- change to reflect your path to the TDOA tracking package:
-addpath('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_master'); 
+%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% Make sure you had specified paths and parameters first in:
+% a) specify_paths.m
+% b) specify_parameters.m
+%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+%% //////////////// 1) Get folders, load data, get parameters /////////////
 
 % --------------------------- a) Get folders:----------------------------
 [folder, folder2save2] = specify_paths;
@@ -13,11 +20,14 @@ addpath('/Users/pinagruden/Dropbox/Pina/Git_projects/TDOA_tracking_master');
 %   available)
 if ~isempty(folder.pamguard)
     files =dir(fullfile(folder.pamguard,'*.mat'));
-    for k=1:size(files,1)
+    N=size(files,1);
+    for k=1:N
         load([folder.pamguard,files(k).name],'All_data_*','parameters')
         pamguard_parameters=parameters;
     end
+    
 end
+
 %   ii) Load data/tracks extracted by the TDOA tracking package:
 %       Load TDOA tracks:
 files =dir(fullfile(folder.tdoas,'*.mat'));
@@ -58,4 +68,51 @@ end
 
 % ---------------------- c) Get paramters: ----------------------
 [AS_params,BA_params] = specify_parameters(parameters);
+
+
+%//////////////////////////////////////////////////////////////////////////
+%% ////////////////// 2) Get All Relevant TDOA tracks ////////////////////
+
+% these tracks are selected based on angles around the beam that you 
+% specified in the specify_parameters.m 
+
+%-------- a) Search for all tracks within x degrees of the beam -----------
+indx=nan(size(Tracks,2),1);
+for k=1:size(Tracks,2)
+indx(k)=ismembertol(0,Tracks(k).tdoa,AS_params.tdoa_cutoff); 
+end
+indx=logical(indx);
+Nsources=sum(indx);
+Tracks_selected=Tracks(indx);
+
+%--- b) Identify min, max times for these tracks & create a time vector---
+mint=min(vertcat(Tracks_selected(:).time));
+maxt=max(vertcat(Tracks_selected(:).time));
+timevec=mint:parameters.dt:maxt;
+Ntsteps=numel(timevec); %number of time steps
+
+%---------- c) Re-arrange tracks in a matrix (Nsources x Ntsteps)--------
+tdoa_measured= nan(Nsources,Ntsteps);
+for k=1:Nsources
+    time_indx=ismember(timevec,Tracks_selected(k).time);
+    tdoa_measured(k,time_indx)= Tracks_selected(k).tdoa;
+end
+
+%-------------- d) PLOT All tracks and Selected tracks:------------------
+
+% Plot against cross-correlograms and against Pamguard detections (if
+% available)
+
+plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
+    Rxy_envelope_both,All_data_c,All_data_w)
+
+
+
+
+
+
+
+
+
+
 
