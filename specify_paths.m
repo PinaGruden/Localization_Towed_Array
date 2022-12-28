@@ -19,7 +19,7 @@ folder.crosscorr = [s.path,'/'];
 %3) Path to Results of Extracted Pamguard detections (Extract_Pamguard_detections package):
 % If they are not avaiable specify folder.pagmuard = [];
 s=what('./Test_example/Data/Pamguard_detections/'); 
-folder.pagmuard = [s.path,'/'];
+folder.pamguard = [s.path,'/'];
 
 % 4) Path to GPS and Sensor Position table (Table obtained by running
 % GetGPSandPhonePositions.m)
