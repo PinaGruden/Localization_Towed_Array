@@ -9,6 +9,7 @@
 % b) specify_parameters.m
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+clear, close all
 
 %% //////////////// 1) Get folders, load data, get parameters /////////////
 
@@ -48,6 +49,7 @@ if ~isempty(folder.crosscorr)
         if ~isempty(strfind(files(k).name,'whistles'))
             Rxy_envelope_both{k}=Rxy_envelope_ALL.*scalar_whistles;
         end
+        clear 'Rxy_envelope_ALL'
     end
 end
 
@@ -84,11 +86,10 @@ end
 indx=logical(indx);
 Nsources=sum(indx);
 Tracks_selected=Tracks(indx);
+clear indx
 
 %--- b) Identify min, max times for these tracks & create a time vector---
-mint=min(vertcat(Tracks_selected(:).time));
-maxt=max(vertcat(Tracks_selected(:).time));
-timevec=mint:parameters.dt:maxt;
+timevec=min(vertcat(Tracks_selected(:).time)):parameters.dt:max(vertcat(Tracks_selected(:).time));
 Ntsteps=numel(timevec); %number of time steps
 
 %---------- c) Re-arrange tracks in a matrix (Nsources x Ntsteps)--------
@@ -97,6 +98,7 @@ for k=1:Nsources
     time_indx=ismember(timevec,Tracks_selected(k).time);
     tdoa_measured(k,time_indx)= Tracks_selected(k).tdoa;
 end
+clear time_indx
 
 %-------------- d) PLOT All tracks and Selected tracks:------------------
 
@@ -108,8 +110,24 @@ plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
 
 
 
+%//////////////////////////////////////////////////////////////////////////
+%% ///////////////// 3) Get Hydrophone positions //////////////////////////
 
+switch BA_params.get_hyph_pos
+    case 1 % SIMUALTED GPS DATA
+        hyph_pos = simulate_array_pos(Ntsteps,BA_params);
 
+    case 2 % REAL GPS DATA
+        % Get Hydrophone positions from data
+         hyph_pos=nan(2,2,Ntsteps);
+        for t=1:Ntsteps
+            hyph_pos(:,:,t)= [GPSandPosition_table.Sensor1_pos_x_m(t),...
+                GPSandPosition_table.Sensor1_pos_y_m(t);...
+                GPSandPosition_table.Sensor2_pos_x_m(t),...
+                GPSandPosition_table.Sensor2_pos_y_m(t)]; %[x1,y1; x2,y2];
+        end
+
+end
 
 
 
