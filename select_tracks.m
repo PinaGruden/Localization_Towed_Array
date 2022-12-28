@@ -8,10 +8,14 @@ function [tdoa_select, selected_indx] = select_tracks(Tracks,timevec,maxtdoa)
 % - maxtdoa : a scalar- maximum tdoa allowed
 
 % OUTPUTS:
+% - tdoa_select : 1 x N vector containing tdoas of the selected source, 
+%                 where N is number of time steps
+% - selected_indx : 1 x N vector indicating in which time step target
+%                   exists (1) and in which it does not (0), where N is 
+%                   number of time steps
 
 
-
-
+% Pina Gruden, Dec 2022, UH Manoa
 
 %---------- Re-arrange Tracks in a matrix (Nsources x Ntsteps)--------
 Ntsteps=numel(timevec); %number of time steps
