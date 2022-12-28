@@ -92,15 +92,8 @@ clear indx
 timevec=min(vertcat(Tracks_selected(:).time)):parameters.dt:max(vertcat(Tracks_selected(:).time));
 Ntsteps=numel(timevec); %number of time steps
 
-%---------- c) Re-arrange tracks in a matrix (Nsources x Ntsteps)--------
-tdoa_measured= nan(Nsources,Ntsteps);
-for k=1:Nsources
-    time_indx=ismember(timevec,Tracks_selected(k).time);
-    tdoa_measured(k,time_indx)= Tracks_selected(k).tdoa;
-end
-clear time_indx
 
-%-------------- d) PLOT All tracks and Selected tracks:------------------
+%-------------- c) PLOT All tracks and Selected tracks:------------------
 
 % Plot against cross-correlograms and against Pamguard detections (if
 % available)
