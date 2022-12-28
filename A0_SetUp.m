@@ -11,6 +11,7 @@
 
 clear, close all
 
+%//////////////////////////////////////////////////////////////////////////
 %% //////////////// 1) Get folders, load data, get parameters /////////////
 
 % --------------------------- a) Get folders:----------------------------
@@ -73,7 +74,7 @@ end
 
 
 %//////////////////////////////////////////////////////////////////////////
-%% ////////////////// 2) Get All Relevant TDOA tracks ////////////////////
+%% ///////// 2) Get All Relevant TDOA tracks around the beam //////////////
 
 % these tracks are selected based on angles around the beam that you 
 % specified in the specify_parameters.m 
@@ -104,7 +105,7 @@ plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
 
 
 %//////////////////////////////////////////////////////////////////////////
-%% ///////////////// 3) Get Hydrophone positions //////////////////////////
+%% ////////////// 3) Get Relevant Hydrophone positions ///////////////////
 
 switch BA_params.get_hyph_pos
     case 1 % SIMUALTED GPS DATA
