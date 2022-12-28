@@ -16,9 +16,9 @@ AS_params.sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 %----------------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
 AS_params.xrange=[-1000,4000]; % x range in m
-AS_params.range=[-4000,4000]; % y range in m
+AS_params.yrange=[-4000,4000]; % y range in m
 AS_params.dx=10; % grid step size in m (resolution) in x direction
-AS_params.dy=dx;% grid step size in m (resolution) in y direction
+AS_params.dy=10;% grid step size in m (resolution) in y direction
 % - Speed of sound
 %c=1500; % We are at the moment using the same as for TDOA tracking
 %parameters.c.
@@ -43,7 +43,7 @@ y=AS_params.yrange(1):AS_params.dy:AS_params.yrange(2);
 AS_params.Ngp_y=length(y);
 [AS_params.X,AS_params.Y] = meshgrid(x,y);
 AS_params.wpos=[AS_params.X(:),AS_params.Y(:)]; %gives grid of N x [x,y,z] coordinates
-AS_params.N= size(wpos,1); %number of grid points to evaluate
+AS_params.N= size(AS_params.wpos,1); %number of grid points to evaluate
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %///////////////////////////////////////////////////////////////////////
@@ -67,10 +67,11 @@ end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~COMPUTED:~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-switch get_hyph_pos
+switch BA_params.get_hyph_pos
     case 1
         BA_params.boatspeed= boatspeed_kts/1.944; %boat speed in m/s
         BA_params.timestep = parameters.dt; % how much time elapses in each time step in s 
+        BA_params.d = parameters.d; % distance between the sensors
     case 2
 %        BA_params.GPSandPosition_table=readtable('GPSandPosition_table.csv'); 
        BA_params.timestep = parameters.dt; % how much time elapses in each time step in s
