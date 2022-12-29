@@ -24,6 +24,21 @@
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 3) Extract Localization info ///////////////////
 
+% NEED TO CHANGE THIS SECTION
+[peakdata] =findpeaks2D(AS_params.X,AS_params.Y,AStotal);
+
+disp(' ')
+disp(['Estimated location for source [', num2str(SelectedTracks),'] is:'])
+disp(' ')
+
+%For the moment take just one of the estimated peaks- CHANGE THIS
+[~,n]=max(peakdata.peakZ);
+estimated_position=[peakdata.peakX(n),peakdata.peakY(n)]; %were at the moment considering 2D, so z coordinate = 0.
+fprintf(['Estimated source location is: [', repmat('%g, ', 1, numel(estimated_position)-1), '%g]\n'],estimated_position)
+fprintf('Width of the peak in X dirextion %.2f \n',peakdata.peakXWidth(n))
+fprintf('Width of the peak in Y dirextion %.2f \n',peakdata.peakYWidth(n))
+fprintf('Ambiguity value for the estimated location is %.2f \n',peakdata.peakZ(n))
+hold on, plot3(peakdata.peakX(n),peakdata.peakY(n),peakdata.peakZ(n), 'ko', 'MarkerFaceColor','g')
 
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 4) Plot ///////////////////
