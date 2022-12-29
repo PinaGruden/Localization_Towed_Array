@@ -1,4 +1,4 @@
-function [tdoa_select, selected_indx] = select_tracks(Tracks,timevec,maxtdoa)
+function [tdoa_select, selected_indx, SelectedTracks] = select_tracks(Tracks,timevec,maxtdoa)
 % select_tracks.m allows user to select which TDOA track or which fragments
 % they want to use to obtain the localization for. 
 
@@ -13,6 +13,9 @@ function [tdoa_select, selected_indx] = select_tracks(Tracks,timevec,maxtdoa)
 % - selected_indx : 1 x N vector indicating in which time step target
 %                   exists (1) and in which it does not (0), where N is 
 %                   number of time steps
+% - SelectedTracks : 1 x M vector of selected tracks indices with respect 
+%                   to Tracks stucture, where M is number of track
+%                   fragments.
 
 
 % Pina Gruden, Dec 2022, UH Manoa
