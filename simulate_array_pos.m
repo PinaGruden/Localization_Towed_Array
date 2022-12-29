@@ -1,4 +1,4 @@
-function [hyph_pos] = simulate_array_pos(Ntsteps,params)
+function [hyph_pos,x_boat, y_boat] = simulate_array_pos(Ntsteps,params)
 % simulate_array_pos.m simulates sensor positions assuming the boat moves
 % in a straight line specified by the slope and interstect
 
