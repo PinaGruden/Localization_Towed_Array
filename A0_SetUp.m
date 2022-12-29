@@ -109,7 +109,7 @@ plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
 
 switch BA_params.get_hyph_pos
     case 1 % SIMUALTED GPS DATA
-        hyph_pos = simulate_array_pos(Ntsteps,BA_params);
+        [hyph_pos,x_boat,y_boat] = simulate_array_pos(Ntsteps,BA_params);
 
     case 2 % REAL GPS DATA
         % Get Hydrophone positions from data
