@@ -20,7 +20,7 @@ AS_params.yrange=[-4000,4000]; % y range in m
 AS_params.dx=10; % grid step size in m (resolution) in x direction
 AS_params.dy=10;% grid step size in m (resolution) in y direction
 % - Speed of sound
-%c=1500; % We are at the moment using the same as for TDOA tracking
+AS_params.c=parameters.c; % We are at the moment using the same as for TDOA tracking
 %parameters.c.
 
 %---------------- Whale swim speed ----------------
@@ -30,7 +30,7 @@ AS_params.mean_horiz_swimspeed= 0.5; %mean horizontal swim speed (for sperm whal
 % Specify what is the first degrees to be considered around the beam - this
 % will affect which tracks you consider for localization
 AS_params.bearing_cuttof = 60;
-bear2tdoa= @(x) cosd(x).*(parameters.d/parameters.c);
+bear2tdoa= @(x) cosd(x).*(parameters.d/AS_params.c);
 AS_params.tdoa_cutoff = bear2tdoa(AS_params.bearing_cuttof);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
