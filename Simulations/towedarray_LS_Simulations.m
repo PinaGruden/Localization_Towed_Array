@@ -11,6 +11,8 @@
 
 %//////////////////////////////////////////////////////////////////////////
 
+addpath ../AS_Localization_code/
+
 %% SIMULATION 1: Stationary source, moving array, no noise on measurements
 clear, close all
 
