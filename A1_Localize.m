@@ -62,8 +62,25 @@ fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from dila
     'is:\n [', repmat('%g, ', 1, numel(estim_location_m_dilated)-1), '%g] m \n and ' ...
     '[', repmat('%f, ', 1, numel(estim_location_m_dilated)-1), '%f]  degrees \n'], ...
     estim_location_m_dilated,estim_location_latlong_dilated)
+
 %//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 4) Plot ///////////////////
+%% //////////////////// 4) Compute perpendicular distance ///////////////////
+
+%get coefficients for a line equation for a boat:
+p=polyfit(GPSandPosition_table.Boat_pos_x_m,GPSandPosition_table.Boat_pos_y_m,1);
+% p =[p1,p0] - where p1= slope and p0= intercept (coeffs of p are in
+% descending powers)
+
+d1=abs(p(1)*estim_location_m(1) - estim_location_m(2) + p(2))./sqrt(p(1)^2+1^2);
+d2=abs(p(1)*estim_location_m_dilated(1) - estim_location_m_dilated(2) + p(2))./sqrt(p(1)^2+1^2);
+
+fprintf(['Estimated perpendicular distance between trackline and source [', ...
+    num2str(SelectedTracks),'] is: \n ', ...
+    '%g m and %g m for non-dilated and dilated AS estimates, respectively. \n'], ...
+    d1,d2)
+
+%//////////////////////////////////////////////////////////////////////////
+%% //////////////////// 5) Plot ///////////////////
 
 switch BA_params.get_hyph_pos
     case 1 % SIMUALTED GPS DATA
