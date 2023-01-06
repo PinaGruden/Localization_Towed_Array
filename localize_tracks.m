@@ -44,10 +44,10 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 %                                       AS as latitude & longitude (in 
 %                                       decimal degrees)
 %              ~ 'distance_m' - perpendicular distance from localization 
-%                              estimate ('Loc_m') to boat trackline
+%                              estimate ('Loc_m') to boat trackline (in m)
 %              ~ 'distance_m_dilated' - perpendicular distance from 
 %                                   localization estimate from dilated AS 
-%                                   ('Loc_m_dilated') to boat trackline
+%                                   ('Loc_m_dilated') to boat trackline (in m)
 
 
 %Pina Gruden January 2023
