@@ -1,7 +1,44 @@
 function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,data_corsscorr,data_pamguard_c,data_pamguard_w)
+% plot_tracks.m is a function that plots all and selected TDOA tracks 
+% against Pamguard detections (if available) or against cross-correlograms
 
-% Plot all and selected TDOA tracks against Pamguard detections (if 
-% available) or against cross-correlograms
+% INPUTS:
+% - folder: a structure specifying paths to data. At least two fields:
+%           ~ folder.crosscorr - path to Cross-correlogram information.
+%                               If not avaiable then folder.crosscorr = [];
+%           ~ folder.pamguard - path to extracted Pamguard detections.
+%                               If not avaiable then folder.pamguard = [].
+% - Tracks: a structure containing all TDOA tracks. Structure has 3 fields:
+%           ~ time - a vector of times (starting at 0) for a given track;
+%           ~ time_local- a vector of times (datetime format) for a
+%                           given track;                          
+%           ~ tdoa - a vector of tdoas for a given track.
+% - Tracks_selected: a structure containing all TDOA tracks. Same fields as
+%                   "Tracks".
+% - t_serialdate - a vector of times (in datetime format) for the encounter. 
+% - lags - a vector of all possible TDOAs (for a given sensor spacing).
+% - parameters - a structure containing at least 3 fields:
+%               ~ parameters.signal_type - a string specifying what signal 
+%               type was used to construct cross-correlograms ('clicks'/
+%               'whistles'/'both')
+%               ~ parameters.d - sensor separation (in m)
+%               ~ parameters.c - speed of sound (in m/s)
+% - data_corsscorr - a 1 x N cell array containing cross-correlogram data.
+%               When parameters.signal_type == 'both' -> N=2, otherwise N=1.
+% - data_pamguard_c- a table containing all Pamguard detections from its
+%                   click detector (if available). Table has 4 columns:
+%           ~ tdoa - a single tdoa for each detected click
+%           ~ bearing - a single bearing for each detected click
+%           ~ time - a time (starting at 0 at the start of encounter) when
+%                   click was detected
+%           ~ time_UTC- a time (specified as date and time in UTC) when
+%                       click was detected                      
+% - data_pamguard_w- a table containing all Pamguard detections from its
+%                   whistle detector (if available). Table has 4 columns
+%                   and are the same as above, but for whistles.
+
+
+%Pina Gruden, 2022, UH Manoa
 
 Nsources=size(Tracks_selected,2);
 
