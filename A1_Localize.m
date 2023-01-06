@@ -2,85 +2,57 @@
 
 
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% Make sure you had first run A0_SetUp.m
+% Make sure you had first run A0_SetUp.m!!!!!
+
+% It loads the following variables to
+% Matlab workspace:
+% - AS_params = a structure containing parameters for ambiguity surface 
+%              computation. (see specify_parameters.m for info on fields in
+%              this structure).  
+% - BA_params = a structure containing parameters for the boat and array.
+%           (see specify_parameters.m for info on fields in this structure)  
+% - GPSandPosition_table = a table containing GPS and sensor information.
+% - hyph_pos = sensor positions per time step- a 2 x N x M array, where
+%           N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
+%            coordinates are considered. M = number of time steps.
+% - timevec = a vector of times that covers the duration of the encounter
+% - Tracks_selected = a structure of tracks that satisfy the cutoff
+%           criteria around the beam. It contains the following fields:
+%                   ~ time - a vector of times (starting at 0) for a given
+%                           track
+%                   ~ time_local- a vector of times (datetime format) for a
+%                           given track                          
+%                   ~ tdoa - a vector of tdoas for a given track
+% - folder2save2 = path to folder where results are saved to.
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
 %//////////////////////////////////////////////////////////////////////////
-%% /////////////////////1) Select TDOA track ///////////////////
+%% /////////////////////1) Localize TDOA tracks ///////////////////
 % Select which TDOA track or which fragments you want to compute
-% localization for
+% localization for, compute localization estimate and perpendicular
+% distance to trackline - results are saved in 'Loc_table'
 
-[tdoa_measured_select,selected_indx,SelectedTracks] = select_tracks(Tracks_selected, ...
-    timevec,AS_params.tdoa_cutoff);
-
-%//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 2) Compute Ambiguity Surface ///////////////////
-
-[AStotal,ASdilatetotal,AStotal_hyperbolas]= computeAS(tdoa_measured_select, ...
-    selected_indx,hyph_pos,AS_params,BA_params);
+[AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(Tracks_selected, ...
+    AS_params,BA_params,GPSandPosition_table,hyph_pos,timevec);
 
 
-%//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 3) Extract Localization info ///////////////////
-
-% NEED TO CHANGE THIS SECTION- at the moment I'm just selecting one max
-% peak... In theory the peak on the other side should be at the same
-% location but it's not in reality..
-
-% % ONE WAY:
-% [peakdata] =findpeaks2D(AS_params.X,AS_params.Y,AStotal);
+% fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from non-dilated AS ' ...
+%     'is:\n [', repmat('%g, ', 1, numel(estim_location_m)-1), '%g] m \n and ' ...
+%     '[', repmat('%f, ', 1, numel(estim_location_m)-1), '%f]  degrees \n'], ...
+%     estim_location_m,estim_location_latlong)
+%  
+% fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from dilated AS ' ...
+%     'is:\n [', repmat('%g, ', 1, numel(estim_location_m_dilated)-1), '%g] m \n and ' ...
+%     '[', repmat('%f, ', 1, numel(estim_location_m_dilated)-1), '%f]  degrees \n'], ...
+%     estim_location_m_dilated,estim_location_latlong_dilated)
 % 
-% disp(' ')
-% disp(['Estimated location for source [', num2str(SelectedTracks),'] is:'])
-% disp(' ')
-% 
-% %For the moment take just one of the estimated peaks- CHANGE THIS
-% [~,n]=max(peakdata.peakZ);
-% estimated_position=[peakdata.peakX(n),peakdata.peakY(n)]; %were at the moment considering 2D, so z coordinate = 0.
-% fprintf(['Estimated source location is: [', repmat('%g, ', 1, numel(estimated_position)-1), '%g]\n'],estimated_position)
-% fprintf('Width of the peak in X dirextion %.2f \n',peakdata.peakXWidth(n))
-% fprintf('Width of the peak in Y dirextion %.2f \n',peakdata.peakYWidth(n))
-% fprintf('Ambiguity value for the estimated location is %.2f \n',peakdata.peakZ(n))
-% hold on, plot3(peakdata.peakX(n),peakdata.peakY(n),peakdata.peakZ(n), 'k*', 'MarkerSize',6)
-
-% ANOTHER WAY:
-ind_max_peak = find(AStotal == max(max(AStotal))); %corresponds to max of x y z. turns into column
-estim_location_m = [AS_params.X(ind_max_peak),AS_params.Y(ind_max_peak)];
-estim_location_latlong = M2LatLon(estim_location_m,[GPSandPosition_table.Boat_Latitude(1),GPSandPosition_table.Boat_Longitude(1)]);
-
-fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from non-dilated AS ' ...
-    'is:\n [', repmat('%g, ', 1, numel(estim_location_m)-1), '%g] m \n and ' ...
-    '[', repmat('%f, ', 1, numel(estim_location_m)-1), '%f]  degrees \n'], ...
-    estim_location_m,estim_location_latlong)
-
-ind_max_peak = find(ASdilatetotal == max(max(ASdilatetotal))); %corresponds to max of x y z. turns into column
-estim_location_m_dilated = [AS_params.X(ind_max_peak),AS_params.Y(ind_max_peak)];
-estim_location_latlong_dilated = M2LatLon(estim_location_m_dilated,[GPSandPosition_table.Boat_Latitude(1),GPSandPosition_table.Boat_Longitude(1)]);
-
-fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from dilated AS ' ...
-    'is:\n [', repmat('%g, ', 1, numel(estim_location_m_dilated)-1), '%g] m \n and ' ...
-    '[', repmat('%f, ', 1, numel(estim_location_m_dilated)-1), '%f]  degrees \n'], ...
-    estim_location_m_dilated,estim_location_latlong_dilated)
+% fprintf(['Estimated perpendicular distance between trackline and source [', ...
+%     num2str(SelectedTracks),'] is: \n ', ...
+%     '%g m and %g m for non-dilated and dilated AS estimates, respectively. \n'], ...
+%     d1,d2)
 
 %//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 4) Compute perpendicular distance ///////////////////
-
-%get coefficients for a line equation for a boat:
-p=polyfit(GPSandPosition_table.Boat_pos_x_m,GPSandPosition_table.Boat_pos_y_m,1);
-% p =[p1,p0] - where p1= slope and p0= intercept (coeffs of p are in
-% descending powers)
-
-d1=abs(p(1)*estim_location_m(1) - estim_location_m(2) + p(2))./sqrt(p(1)^2+1^2);
-d2=abs(p(1)*estim_location_m_dilated(1) - estim_location_m_dilated(2) + p(2))./sqrt(p(1)^2+1^2);
-
-fprintf(['Estimated perpendicular distance between trackline and source [', ...
-    num2str(SelectedTracks),'] is: \n ', ...
-    '%g m and %g m for non-dilated and dilated AS estimates, respectively. \n'], ...
-    d1,d2)
-
-%//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 5) Plot ///////////////////
+%% //////////////////// 2) Plot ///////////////////
 
 switch BA_params.get_hyph_pos
     case 1 % SIMUALTED GPS DATA
@@ -93,13 +65,20 @@ switch BA_params.get_hyph_pos
 end
 
 % Final ambiguity surface
-plot_AS(AStotal,AS_params,hyph_pos,boat_pos,estim_location_m);
-title (['Total ambiguity surface for source ', num2str(SelectedTracks)])
+for k=1:size(Loc_table,1)
+plot_AS(AStotal{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m{k});
+title (['Total ambiguity surface for source ', num2str(Loc_table.TrackID{k})])
 
 % Final ambiguity surface with dilation
-plot_AS(ASdilatetotal,AS_params,hyph_pos,boat_pos,estim_location_m_dilated);
-title(['Total ambiguity surface WITH dilation for source ', num2str(SelectedTracks)])
+plot_AS(ASdilatetotal{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated{k});
+title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table.TrackID{k})])
 
 % Final surface with intersecting hyperbolas
-plot_AS(AStotal_hyperbolas,AS_params,hyph_pos,boat_pos,estim_location_m);
-title (['Intersecting hyperbolas for source ', num2str(SelectedTracks)])
+plot_AS(AStotal_hyperbolas{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m{k});
+title (['Intersecting hyperbolas for source ', num2str(Loc_table.TrackID{k})])
+end
+
+%//////////////////////////////////////////////////////////////////////////
+%% //////////////////// 3) Save ///////////////////
+
+save([folder2save2,'Results.mat'],'Loc_table','AStotal','ASdilatetotal','AStotal_hyperbolas')
