@@ -42,7 +42,33 @@ Then run the package by running:
 
 1. Otuput of simulated script are localization estimates and plots of the results.
 
-2. Otuput of real data processing is a table containing localization estimate and perpendicular distance to boat trackline for each selected TDOA track (or fragments of the same TDOA track), and plots of the results. 
+2. Otuput of real data processing is a table containing localization estimate and perpendicular distance to boat trackline for each selected TDOA track (or fragments of the same TDOA track), and plots of the results. Specifically the saved results are:
+
+- AStotal: final ambiguity surface, a 1 x M cell array where M is a 
+          number tracked sources/groups. Each cell is an A x B matrix 
+          where A is number of y coordinates, and B is number of x coordinates. 
+- ASdilatetotal: final ambiguity surface with dilation, same dimensions 
+                  as AStotal. 
+- AStotal_hyperbolas: final surface with intersecting hyperbolas, same
+                      dimensions as AStotal.
+- Loc_table: table with localization information with 7 columns:
+             ~ 'TrackID'- selected track indices corresponding to entries
+                          of input structure 'Tracks'.
+             ~ 'Loc_m'- localization estimate in Cartesian coordinates 
+                        with respect to start of boat track (in m) 
+             ~ 'Loc_LatLong' - localization estimate as latitude &
+                              longitude (in decimal degrees)
+             ~ 'Loc_m_dilated' - localization estimate from dilated AS   
+                              in Cartesian coordinates with respect to  
+                              start of boat track (in m)
+             ~ 'Loc_LatLong_dilated'- localization estimate from dilated 
+                                      AS as latitude & longitude (in 
+                                      decimal degrees)
+             ~ 'distance_m' - perpendicular distance from localization 
+                             estimate ('Loc_m') to boat trackline (in m)
+             ~ 'distance_m_dilated' - perpendicular distance from 
+                                  localization estimate from dilated AS 
+                                  ('Loc_m_dilated') to boat trackline (in m)
 
  
  
