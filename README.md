@@ -35,14 +35,14 @@ Before running the package specify the paths and parameters for your application
 
 Then run the package by running:
 1) A0_SetUp.m - this reads all relevant data into Matlab workspace, it also selects TDOA tracks and relevant hydrophone positions that will be used to obtain final localizations.
-2) A1_Localize.m - this localizes a selected group of animals (TDOA track). It requires user input on which of the track fragments one wants to localize (since one track is often fragmented into separate track fragments). Results are displayed as Cartesian coordinates and latitude/longitude in the command prompt and as plots.
+2) A1_Localize.m - this localizes user selected group(s) of animals (TDOA track(s)). It requires user input on which of the track fragments one wants to localize (since one track is often fragmented into separate track fragments). Results are saved into a table and contain information of localization (Cartesian coordinates and latitude/longitude), and perpendicular distance to boat trackline for localized sources. Localized groups are also plotted.
 
 
 ## Output
 
 1. Otuput of simulated script are localization estimates and plots of the results.
 
-2. Otuput of real data processing is an localization estimate for a selected TDOA track (or fragments of the same TDOA track), and plots of the results. 
+2. Otuput of real data processing is a table containing localization estimate and perpendicular distance to boat trackline for each selected TDOA track (or fragments of the same TDOA track), and plots of the results. 
 
  
  
