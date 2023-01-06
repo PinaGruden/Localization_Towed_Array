@@ -2,7 +2,7 @@
 ######################
 /Test_example/
 specify_paths.m
-specify_parameters.m
+%specify_parameters.m
 
 # Matlab generated files #
 ######################
