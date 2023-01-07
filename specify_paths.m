@@ -4,7 +4,7 @@ function [folder, folder2save2] = specify_paths
 % 2) Cross-correlogram info (from TDOA_tracking_masters package)
 % 3) Results of Extracted Pamguard detections of clicks and whistles (if 
 % available,from Extract_Pamguard_detections package)
-%
+% 4) Folder where all raw GPS and Array data is
 % 5) Folder where GPS and Sensor Position table should be saved
 % 6) Folder where localization results should be saved to
 
