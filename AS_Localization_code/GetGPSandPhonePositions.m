@@ -21,7 +21,7 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 % - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
 %                   ~ time - a vector of times (starting at 0) for a given
 %                           track;
-%                   ~ time_local- a vector of times (datetime format) for a
+%                   ~ time_local- a vector of times (serial date format) for a
 %                           given track;                          
 %                   ~ tdoa - a vector of tdoas for a given track.
 % - parameters - a structure containing at least 3 fields:

@@ -7,7 +7,7 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 % - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
 %                   ~ time - a vector of times (starting at 0) for a given
 %                           track
-%                   ~ time_local- a vector of times (datetime format) for a
+%                   ~ time_local- a vector of times (serial date format) for a
 %                           given track                          
 %                   ~ tdoa - a vector of tdoas for a given track
 % - AS_params: a structure containing parameters for ambiguity surface 

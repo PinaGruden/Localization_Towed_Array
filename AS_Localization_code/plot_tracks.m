@@ -10,12 +10,12 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 %                               If not avaiable then folder.pamguard = [].
 % - Tracks: a structure containing all TDOA tracks. Structure has 3 fields:
 %           ~ time - a vector of times (starting at 0) for a given track;
-%           ~ time_local- a vector of times (datetime format) for a
+%           ~ time_local- a vector of times (serial date format) for a
 %                           given track;                          
 %           ~ tdoa - a vector of tdoas for a given track.
 % - Tracks_selected: a structure containing all TDOA tracks. Same fields as
 %                   "Tracks".
-% - t_serialdate - a vector of times (in datetime format) for the encounter. 
+% - t_serialdate - a vector of times (in serial date format) for the encounter. 
 % - lags - a vector of all possible TDOAs (for a given sensor spacing).
 % - parameters - a structure containing at least 3 fields:
 %               ~ parameters.signal_type - a string specifying what signal 
