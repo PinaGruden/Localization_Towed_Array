@@ -1,10 +1,15 @@
 function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(Tracks,AS_params,BA_params,GPSandPosition_table,hyph_pos,timevec)
 %function localize_tracks.m localizes a selected TDOA track (or a gourp of
-%track segments) using the ambiguity surfaces and returns computed surfaces
+%track segments) using the ambiguity surfaces (AS) and returns computed surfaces
 %along with the localization and perpendicular distance information.
 
 %INPUTS:
-% - Tracks,
+% - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
+%                   ~ time - a vector of times (starting at 0) for a given
+%                           track
+%                   ~ time_local- a vector of times (datetime format) for a
+%                           given track                          
+%                   ~ tdoa - a vector of tdoas for a given track
 % - AS_params: a structure containing parameters for ambiguity surface 
 %              computation. (see specify_parameters.m for info on fields in
 %              this structure)  
@@ -18,10 +23,32 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 
 
 %OUTPUTS:
-% - AStotal,
-% - ASdilatetotal,
-% - AStotal_hyperbolas,
-% - Loc_table
+% - AStotal: final ambiguity surface, a 1 x M cell array where M is a 
+%           number tracked sources/groups. Each cell is an A x B matrix 
+%           where A is number of y coordinates, and B is number of x coordinates. 
+% - ASdilatetotal: final ambiguity surface with dilation, same dimensions 
+%                   as AStotal. 
+% - AStotal_hyperbolas: final surface with intersecting hyperbolas, same
+%                       dimensions as AStotal.
+% - Loc_table: table with localization information with 7 columns:
+%              ~ 'TrackID'- selected track indices corresponding to entries
+%                           of input structure 'Tracks'.
+%              ~ 'Loc_m'- localization estimate in Cartesian coordinates 
+%                         with respect to start of boat track (in m) 
+%              ~ 'Loc_LatLong' - localization estimate as latitude &
+%                               longitude (in decimal degrees)
+%              ~ 'Loc_m_dilated' - localization estimate from dilated AS   
+%                               in Cartesian coordinates with respect to  
+%                               start of boat track (in m)
+%              ~ 'Loc_LatLong_dilated'- localization estimate from dilated 
+%                                       AS as latitude & longitude (in 
+%                                       decimal degrees)
+%              ~ 'distance_m' - perpendicular distance from localization 
+%                              estimate ('Loc_m') to boat trackline
+%              ~ 'distance_m_dilated' - perpendicular distance from 
+%                                   localization estimate from dilated AS 
+%                                   ('Loc_m_dilated') to boat trackline
+
 
 %Pina Gruden January 2023
 
