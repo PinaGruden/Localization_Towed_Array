@@ -36,7 +36,7 @@ Before running the package specify the paths and parameters for your application
 
 Then run the package by running:
 
-1) A0_GetGPSData.m [Optional]: If real GPS data is available then this reads all relevant GPS data into Matlab workspace, and computes sensor positions. It saves results into a .csv table (at the location specified in specify_paths.m).
+1) [Optional] A0_GetGPSData.m: If real GPS data is available then this reads all relevant GPS data into Matlab workspace, and computes sensor positions. It saves results into a .csv table (at the location specified in specify_paths.m).
 
 2) A0_SetUp.m - this reads all relevant data into Matlab workspace, it also selects TDOA tracks and relevant hydrophone positions that will be used to obtain final localizations.
 
