@@ -2,7 +2,8 @@
 
 
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% Make sure you had first run A0_SetUp.m!!!!!
+% Make sure you had first run A0_SetUp.m!!!!! and if GPS data avaialbe also
+% run A0_GetGPSData.m!
 
 % It loads the following variables to
 % Matlab workspace:
