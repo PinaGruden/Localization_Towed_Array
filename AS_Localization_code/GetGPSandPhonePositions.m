@@ -4,6 +4,23 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 % encounter (specified in t_serialdate).
 
 %INPUTS
+% - gps_data - a table containing GPS information. The following columns are expected:
+%       ~ UTC - date and time in UTC;
+%       ~ Longitude - boat longitude information;
+%       ~ Latitude - boat latitude information.
+% - depth_data- a table containing sensor depth information. The following columns are expected:
+%       ~ UTC - date and time in UTC;
+%       ~ Sensor_0_Depth - sensor 1 depth in m;
+%       ~ Sensor_1_Depth - sensor 2 depth in m.
+% - array_data - a table containing sensor spacing information.The following columns are expected:
+%       ~ Array_name - name of the array that matches the name of the array
+%                      specified in parameters struct;
+%       ~ distance_behind_boat - array distance behind the boat in m
+%       ~ Hyph_1 - distance of the first sensor used from the beginning of the
+%                  array in m
+% - Tracks - a structure of tracked TDOAs with the,
+% - parameters,
+% - t_serialdate
 
 %OUTPUTS
 
@@ -47,10 +64,16 @@ interp_depth_s1= interp1(datenum(depth_data_select.UTC),depth_data_select.Sensor
 interp_depth_s2= interp1(datenum(depth_data_select.UTC),depth_data_select.Sensor_1_Depth,t_serialdate);
 
 %///////// X,Y Positions (relative to the boat) //////////
-d_boat_m = array_data{strcmp(array_data.Array_name,parameters.arrayname),4};
+row_number=strcmp(array_data.Array_name,parameters.arrayname);
+varnames = array_data.Properties.VariableNames;
+[~, column_number_a] = ismember('distance_behind_boat', varnames);
+match = strfind(varnames, num2str(parameters.channels(1))); %indicates which is the first sensor used
+column_number_s1  = ~cellfun('isempty', match);
+
+d_boat_m = array_data{row_number,column_number_a};
  %array distance behind the boat
  %first sensor distance behind boat:
-d_s1_m =d_boat_m + array_data{strcmp(array_data.Array_name,parameters.arrayname),5};
+d_s1_m =d_boat_m + array_data{row_number,column_number_s1};
  %second sensor distance behind boat:
 d_s2_m = d_s1_m + parameters.d; % parameters.d = sensor separation
 

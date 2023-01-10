@@ -53,7 +53,7 @@ if ~isempty(folder.rawgps)
 
     %-------------------------------------------------------------
     %---------------------SAVE TABLE---------------------------
-    writetable(GPSandPosition_table,[folder.gps,'GPSandPosition_table_test.csv']);
+    writetable(GPSandPosition_table,[folder.gps,'GPSandPosition_table.csv']);
 
     %-------------------------------------------------------------
 
