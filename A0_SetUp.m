@@ -7,6 +7,8 @@
 % Make sure you had specified paths and parameters first in:
 % a) specify_paths.m
 % b) specify_parameters.m
+
+% and if GPS data avaiable, make sure you have run A0_GetGPSData.m
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 clear, close all

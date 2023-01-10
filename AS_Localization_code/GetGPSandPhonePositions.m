@@ -18,15 +18,46 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 %       ~ distance_behind_boat - array distance behind the boat in m
 %       ~ Hyph_1 - distance of the first sensor used from the beginning of the
 %                  array in m
-% - Tracks - a structure of tracked TDOAs with the,
-% - parameters,
-% - t_serialdate
+% - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
+%                   ~ time - a vector of times (starting at 0) for a given
+%                           track;
+%                   ~ time_local- a vector of times (datetime format) for a
+%                           given track;                          
+%                   ~ tdoa - a vector of tdoas for a given track.
+% - parameters - a structure containing at least 3 fields:
+%               ~ parameters.arrayname - name of the array used to track
+%               (should match 'Array_name' in the array_data table)
+%               ~ parameters.channels - 1 x 2 vector that indicates which
+%               sensors are used for tracking and localization.
+%               ~ parameters.d - sensor separation (in m)
+% - t_serialdate - a vector of times (in serial date format) for the encounter.
 
-%OUTPUTS
+%OUTPUTS:
+% - GPSandPosition_table - a table containing boat and array position data.
+%                           It has the following columns:
+%       ~ 'Time_datenum '- date and time in serial date format,
+%       ~ 'Time_UTC' - date and time in UTC,
+%       ~ 'Boat_Latitude' - boat position - latitude (in decimal degrees),
+%       ~ 'Boat_Longitude'- boat position - longitude (in decimal degrees), 
+%       ~ 'Boat_pos_x_m'- boat position along x-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
+%       ~ 'Boat_pos_y_m'- boat position along y-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m), 
+%       ~ 'Sensor1_pos_x_m'- sensor 1 position along x-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
+%       ~ 'Sensor1_pos_y_m'- sensor 1 position along y-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
+%       ~ 'Sensor1_pos_z_m'- sensor 1 position along z-axis (depth) - Cartesian coordinates 
+%                         with respect to start of boat track (in m), 
+%       ~ 'Sensor2_pos_x_m'- sensor 2 position along x-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
+%       ~ 'Sensor2_pos_y_m'- sensor 2 position along y-axis - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
+%       ~ 'Sensor2_pos_z_m'- sensor 2 position along z-axis (depth) - Cartesian coordinates 
+%                         with respect to start of boat track (in m),
 
 
 %Pina Gruden, winter 2022, UH Manoa
-
 
 
 % datetime array format of times:
