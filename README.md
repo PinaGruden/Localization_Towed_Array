@@ -29,15 +29,18 @@ This packages assumes that you have run **TDOA tracking master** package first a
 
 Before running the package specify the paths and parameters for your application by modifying the following scripts: 
 
-- specify_paths.m - Specify folders where data is located and where results should be saved to. The expected data format are .mat files obtained from **TDOA tracking master** and optionally **Extract Pamguard detections** packages.
+- specify_paths.m - Specify folders where data is located and where results should be saved to. The expected data format are .mat files obtained from **TDOA tracking master** and optionally **Extract Pamguard detections** packages.  If GPS and sensor depth information is available these are expected to be in .csv format.
 
 - specify_parameters.m - This is where you specify parameters for localization. Change any parameters in the sections labeled “ CHANGABLE:” as needed. 
 
 
 Then run the package by running:
-1) A0_SetUp.m - this reads all relevant data into Matlab workspace, it also selects TDOA tracks and relevant hydrophone positions that will be used to obtain final localizations.
 
-2) A1_Localize.m - this localizes user selected group(s) of animals (TDOA track(s)). It requires user input on which of the track fragments one wants to localize (since one track is often fragmented into separate track fragments). Results are saved into a table and contain information of localization (Cartesian coordinates and latitude/longitude), and perpendicular distance to boat trackline for localized sources. Localized groups are also plotted.
+1) A0_GetGPSData.m [Optional]: If real GPS data is available then this reads all relevant GPS data into Matlab workspace, and computes sensor positions. It saves results into a .csv table (at the location specified in specify_paths.m).
+
+2) A0_SetUp.m - this reads all relevant data into Matlab workspace, it also selects TDOA tracks and relevant hydrophone positions that will be used to obtain final localizations.
+
+3) A1_Localize.m - this localizes user selected group(s) of animals (TDOA track(s)). It requires user input on which of the track fragments one wants to localize (since one track is often fragmented into separate track fragments). Results are saved into a table and contain information of localization (Cartesian coordinates and latitude/longitude), and perpendicular distance to boat trackline for localized sources. Localized groups are also plotted.
 
 
 ## Output
