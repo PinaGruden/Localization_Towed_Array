@@ -2,7 +2,7 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 % GetGPSandPhonePositions.m is a function that creates a table which
 % contains GPS data and hydrophone positions for a given timeframe of the
 % encounter (specified in t_serialdate).
-
+%
 %INPUTS
 % - gps_data - a table containing GPS information. The following columns are expected:
 %       ~ UTC - date and time in UTC;
@@ -31,7 +31,7 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 %               sensors are used for tracking and localization.
 %               ~ parameters.d - sensor separation (in m)
 % - t_serialdate - a vector of times (in serial date format) for the encounter.
-
+%
 %OUTPUTS:
 % - GPSandPosition_table - a table containing boat and array position data.
 %                           It has the following columns:
@@ -55,8 +55,8 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 %                         with respect to start of boat track (in m),
 %       ~ 'Sensor2_pos_z_m'- sensor 2 position along z-axis (depth) - Cartesian coordinates 
 %                         with respect to start of boat track (in m),
-
-
+%
+%
 %Pina Gruden, winter 2022, UH Manoa
 
 

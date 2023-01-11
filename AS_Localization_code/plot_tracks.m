@@ -1,7 +1,7 @@
 function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,data_corsscorr,data_pamguard_c,data_pamguard_w)
 % plot_tracks.m is a function that plots all and selected TDOA tracks 
 % against Pamguard detections (if available) or against cross-correlograms
-
+%
 % INPUTS:
 % - folder: a structure specifying paths to data. At least two fields:
 %           ~ folder.crosscorr - path to Cross-correlogram information.
@@ -36,8 +36,8 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 % - data_pamguard_w- a table containing all Pamguard detections from its
 %                   whistle detector (if available). Table has 4 columns
 %                   and are the same as above, but for whistles.
-
-
+%
+%
 %Pina Gruden, 2022, UH Manoa
 
 Nsources=size(Tracks_selected,2);

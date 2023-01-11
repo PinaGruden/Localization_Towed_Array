@@ -1,7 +1,7 @@
 function [AStotal,ASdilatetotal,AStotal_hyperbolas] = computeAS(tdoa_measured_select,selected_indx,hyph_pos,AS_params,BA_params)
 %computeAS.m computes an ambiguity surface (AS) for a given source based on 
 %the measured and modeled time difference of arrivals (TDOAs)
-
+%
 % INPUTS:
 % - tdoa_measured_select : 1 x T vector containing tdoas of the selected source, 
 %                 where T is number of time steps
@@ -13,8 +13,7 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas] = computeAS(tdoa_measured_se
 % - AS_params : a structure containing parameters for ambiguity surface
 %               computation
 % - BA_params : a structure containing parameters for boat and array
-
-
+%
 % OUTPUTS:
 % - AStotal : final ambiguity surface, an A x B matrix where A is number of
 %              y coordinates, and B is number of x coordinates 
@@ -22,7 +21,8 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas] = computeAS(tdoa_measured_se
 %                  as AStotal
 % - AStotal_hyperbolas: final surface with intersecting hyperbolas, same
 %                       dimensions as AStotal
-
+%
+%
 % Pina Gruden, Dec 2022, UH Manoa
 
 

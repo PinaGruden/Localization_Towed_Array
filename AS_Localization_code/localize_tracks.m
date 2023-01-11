@@ -2,7 +2,7 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 %function localize_tracks.m localizes a selected TDOA track (or a gourp of
 %track segments) using the ambiguity surfaces (AS) and returns computed surfaces
 %along with the localization and perpendicular distance information.
-
+%
 %INPUTS:
 % - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
 %                   ~ time - a vector of times (starting at 0) for a given
@@ -20,8 +20,7 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 %           N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
 %            coordinates are considered. M = number of time steps.         
 % - timevec : a 1 x M vector of times that covers the duration of the encounter  
-
-
+%
 %OUTPUTS:
 % - AStotal: final ambiguity surface, a 1 x M cell array where M is a 
 %           number tracked sources/groups. Each cell is an A x B matrix 
@@ -48,8 +47,8 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(
 %              ~ 'distance_m_dilated' - perpendicular distance from 
 %                                   localization estimate from dilated AS 
 %                                   ('Loc_m_dilated') to boat trackline
-
-
+%
+%
 %Pina Gruden January 2023
 
 

@@ -1,7 +1,7 @@
 function [hyph_pos,x_boat, y_boat] = simulate_array_pos(Ntsteps,params)
 % simulate_array_pos.m simulates sensor positions assuming the boat moves
 % in a straight line specified by the slope and interstect
-
+%
 % INPUTS:
 % - Ntsteps : number of time steps to simulate
 % - params : a structure that contains information on the boat and line
@@ -10,11 +10,12 @@ function [hyph_pos,x_boat, y_boat] = simulate_array_pos(Ntsteps,params)
 %           ~ params.b = intersect with y axis
 %           ~ params.boatspeed = boat speed in m/s
 %           ~ params.timestep = how much time elapses in each time step in s
-
+%
 % OUTPUTS:
 % - hyph_pos : a NxMxT array, where T= number of time steps, N=number of
 %              sensors and M is number of coordinates (e.g. x,y or x,y,z)
-
+%
+%
 % Pina Gruden, Dec 2022, UH Manoa
 
 % Simulate Boat movement and Hydrophone positions

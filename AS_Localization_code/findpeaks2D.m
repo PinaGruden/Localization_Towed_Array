@@ -1,6 +1,5 @@
 function [peakdata] =findpeaks2D(X,Y,LStotal)
-
-%Find peaks in the ambiguity surface and compute their widths
+% findpeaks2D.m finds peaks in the ambiguity surface and computes their widths
 
 % Find dimensions to set up loop
 xdim = size(X,1);

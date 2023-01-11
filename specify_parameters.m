@@ -1,15 +1,14 @@
 function [AS_params,BA_params] = specify_parameters(parameters)
 % Specify parameters for towed array localization:
 % Make sure you change/adjust parameters under captions "Changable"
-
+%
 %INPUTS:
 % - parameters : a structure containing array and encounter info (used to
 %   obtain cross-correlograms)- the minimum fields required are:
 %   ~ c : speed of sound - a scalar 
 %   ~ d : distance between the two sensors - a scalar
 %   ~ dt : how much time elapses in each time step in s - a scalar
-
-
+%
 %OUTPUTS:
 % - AS_params= a structure containing parameters for ambiguity surface 
 %              computation. It has the following fields:
@@ -46,9 +45,8 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 %           * d : distance between the sensors
 %       - When get_hyph_pos==2 the following fields are included:
 %           * timestep :how much time elapses in each time step in s
-
-
-
+%
+%
 %Pina Gruden, Dec 2022, UH Manoa
 
 %% //////////////////// SET PARAMETERS //////////////////// 

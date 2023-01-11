@@ -1,7 +1,7 @@
 function plot_AS(AStotal,AS_params,hyph_pos,boat_pos,est_loc_m)
 %plotAS.m is a function that plots the final ambiguity surface (AStotal),
 %boat and array position.
-
+%
 % INPUTS:
 % - AStotal : final ambiguity surface, an A x B matrix where A is number of
 %              y coordinates, and B is number of x coordinates 
@@ -13,7 +13,8 @@ function plot_AS(AStotal,AS_params,hyph_pos,boat_pos,est_loc_m)
 % (in m) and 2nd column contains y-coordinates (in m) of boat position
 % - est_loc_m : 1x2 vector indicating x and y coordinates of the estimated
 %               source location (in m)
-
+%
+%
 % Pina Gruden, Dec 2022, UH Manoa
 
 X= AS_params.X;

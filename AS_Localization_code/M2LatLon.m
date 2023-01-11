@@ -1,5 +1,5 @@
 function PosLatLon = M2LatLon(PosM, PosZero)
-
+%
 % Convert position in Meters to Lat/Lon according to a given zero position (in
 % lat/lon)
 % PosLatLon = [lat(decimal degrees)  lon(decimal degrees)];
