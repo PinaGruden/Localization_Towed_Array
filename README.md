@@ -2,7 +2,13 @@
  
  This repo contains code for the localization with ambiguity surfaces for towed array data.
  
- It is developed with Matlab version 2022a. (if using older versions commands clim and FontSize for plotting do not exist)
+
+## Required Matlab toolboxes
+
+This package was developed with Matlab version 2022a (9.12). (if using older versions commands clim and FontSize for plotting do not exist). It uses the following Matlab toolboxes:
+- Signal Processing Toolbox
+- Mapping Toolbox
+- Image Processing Toolbox
  
  ## How to use
  
