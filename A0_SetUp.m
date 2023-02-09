@@ -102,7 +102,7 @@ Ntsteps=numel(timevec); %number of time steps
 % available)
 
 plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
-    Rxy_envelope_both,All_data_c,All_data_w)
+    AS_params.tdoa_cutoff,Rxy_envelope_both,All_data_c,All_data_w)
 
 
 

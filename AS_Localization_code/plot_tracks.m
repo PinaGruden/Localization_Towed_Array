@@ -1,4 +1,4 @@
-function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,data_corsscorr,data_pamguard_c,data_pamguard_w)
+function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,tdoa_cutoff,data_corsscorr,data_pamguard_c,data_pamguard_w)
 % plot_tracks.m is a function that plots all and selected TDOA tracks 
 % against Pamguard detections (if available) or against cross-correlograms
 %
@@ -13,7 +13,7 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 %           ~ time_local- a vector of times (serial date format) for a
 %                           given track;                          
 %           ~ tdoa - a vector of tdoas for a given track.
-% - Tracks_selected: a structure containing all TDOA tracks. Same fields as
+% - Tracks_selected: a structure containing selected TDOA tracks. Same fields as
 %                   "Tracks".
 % - t_serialdate - a vector of times (in serial date format) for the encounter. 
 % - lags - a vector of all possible TDOAs (for a given sensor spacing).
@@ -23,6 +23,7 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 %               'whistles'/'both')
 %               ~ parameters.d - sensor separation (in m)
 %               ~ parameters.c - speed of sound (in m/s)
+% - tdoa_cutoff- a scalar- TDOA cutoff value used to select tracks.
 % - data_corsscorr - a 1 x N cell array containing cross-correlogram data.
 %               When parameters.signal_type == 'both' -> N=2, otherwise N=1.
 % - data_pamguard_c- a table containing all Pamguard detections from its
@@ -42,6 +43,9 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 
 Nsources=size(Tracks_selected,2);
 
+b_col=[0 0.4470 0.7410];
+r_col=[0.8500 0.3250 0.0980];
+y_col=[0.9290 0.6940 0.1250];
 
 if ~isempty(folder.crosscorr) % plot against cross-correlograms
 
@@ -59,7 +63,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             colormap(flipud(gray(256)))
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-            title(['Tracked TDOAs from measurements based on ', parameters.signal_type])
+            title(['Cross-correlogram with tracked and selected TDOAs from measurements based on ', parameters.signal_type])
             caxis([0,10])
             im.AlphaData = 0.5; % change this value to change the background image transparency
             hold all;
@@ -83,21 +87,33 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             %Plot All tracked TDOAs
             hold on
             for k=1:size(Tracks,2)
-                plot(ax2,Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
+                plot(ax2,Tracks(k).time_local, Tracks(k).tdoa,'-','Color',b_col,'LineWidth',4)
             end
             datetick('x','keeplimits');
 
             % Plot Selected TDOA tracks
             hold on
             for k=1:Nsources
-                plot(ax2,Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
-                text(ax2,Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
+                plot(ax2,Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
+                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+                text(ax2,Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
                     num2str(k),'FontSize',16,'Color','k')
             end
 
-            h1(1) = plot(NaN, NaN,'b-','LineWidth',4);
-            h1(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-            legend(h1,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
+            % Plot the User selected TDOA cutoff:
+            hold on
+            plot(t_serialdate, abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+            plot(t_serialdate, -1*abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+
+            h1(1) = plot(NaN, NaN,'-','Color',b_col,'LineWidth',4);
+            h1(2) = plot(NaN, NaN,'m:','LineWidth',2);
+            h1(3) = plot(NaN, NaN,'-','Color',y_col,'LineWidth',2.5);
+            h1(4) = plot(NaN, NaN,'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2);
+            legend(h1,'All Tracked TDOAs',['User selected cutoff ' ...
+                '(\fontname{Courier}bearing\_cuttof \fontname{Helvetica}in ' ...
+                '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
+                'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
+                'Start of selected track','Location', 'southeast');
             %             set(gca,'FontSize',14)
             %             set(findall(gcf,'type','text'),'FontSize',14)
             hold off
@@ -114,28 +130,39 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             colorbar
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-            title(['Tracked TDOAs from measurements based on ', parameters.signal_type])
+            title(['Cross-correlogram with tracked and selected TDOAs from measurements based on ', parameters.signal_type])
 
             %Plot All tracked TDOAs
             hold on
             for k=1:size(Tracks,2)
-                plot(Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
+                plot(Tracks(k).time_local, Tracks(k).tdoa,'-','Color',b_col,'LineWidth',4)
             end
             datetick('x','keeplimits');
 
             % Plot Selected TDOA tracks
             for k=1:Nsources
-                plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
-                text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
+                plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
+                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+                text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
                     num2str(k),'FontSize',16,'Color','k')
             end
             xlim([t_serialdate(1),t_serialdate(end)])
 
-            h1(1) = plot(NaN, NaN,'b-','LineWidth',4);
-            h1(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-            legend(h1,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
-            %             set(gca,'FontSize',14)
-            %             set(findall(gcf,'type','text'),'FontSize',14)
+            % Plot the User selected TDOA cutoff:
+            hold on
+            plot(t_serialdate, abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+            plot(t_serialdate, -1*abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+
+            h1(1) = plot(NaN, NaN,'-','Color',b_col,'LineWidth',4);
+            h1(2) = plot(NaN, NaN,'m:','LineWidth',2);
+            h1(3) = plot(NaN, NaN,'-','Color',y_col,'LineWidth',2.5);
+            h1(4) = plot(NaN, NaN,'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2);
+            legend(h1,'All Tracked TDOAs',['User selected cutoff ' ...
+                '(\fontname{Courier}bearing\_cuttof \fontname{Helvetica}in ' ...
+                '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
+                'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
+                'Start of selected track','Location', 'southeast');
+
             hold off
 
     end
@@ -154,21 +181,39 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
     plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
     % Plot All TDOA tracks
     for k=1:size(Tracks,2)
-        plot(Tracks(k).time_local, Tracks(k).tdoa,'b-','LineWidth',4)
+        plot(Tracks(k).time_local, Tracks(k).tdoa,'-','Color',b_col,'LineWidth',5)
     end
     set(gca,'YDir', 'reverse');
     datetick('x','keeplimits');
     % Plot Selected TDOA tracks
     for k=1:Nsources
-        plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'r-','LineWidth',2.5),
-        text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1), ...
+        plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
+        plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+        text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
             num2str(k),'FontSize',16,'Color','k')
     end
     xlim([t_serialdate(1),t_serialdate(end)])
+    ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
     xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-    h(1) = plot(NaN, NaN,'b-','LineWidth',4);
-    h(2) = plot(NaN, NaN,'r-','LineWidth',2.5);
-    legend(h,'All Tracked TDOAs','Selected TDOAs','Location', 'southeast');
+    title('Tracked and selected TDOAs along Pamguard detections.')
+
+    % Plot the User selected TDOA cutoff:
+    hold on
+    plot(t_serialdate, abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+    plot(t_serialdate, -1*abs(tdoa_cutoff).*ones(size(t_serialdate)),'m:','LineWidth',1.5)
+  
+
+    h1(1) = plot(NaN, NaN,'-','Color',b_col,'LineWidth',4);
+    h1(2) = plot(NaN, NaN,'m:','LineWidth',2);
+    h1(3) = plot(NaN, NaN,'-','Color',y_col,'LineWidth',2.5);
+    h1(4) = plot(NaN, NaN,'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2);
+    h1(5) = plot(NaN, NaN,'o','Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3);
+    legend(h1,'All Tracked TDOAs',['User selected cutoff ' ...
+        '(\fontname{Courier}bearing\_cuttof \fontname{Helvetica}in ' ...
+        '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
+        'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
+        'Start of selected track','Pamguard detections','Location', 'southeast');
+
     hold off
 end
 
