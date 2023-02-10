@@ -11,8 +11,9 @@ function plot_AS(AStotal,AS_params,hyph_pos,boat_pos,est_loc_m)
 %              sensors and M is number of coordinates (e.g. x,y or x,y,z)
 % - boat_pos : a N x 2 matrix, where 1st column contains x-coordinates
 % (in m) and 2nd column contains y-coordinates (in m) of boat position
-% - est_loc_m : 1x2 vector indicating x and y coordinates of the estimated
-%               source location (in m)
+% - est_loc_m : nx2 matrix, where each row indicates x and y coordinates 
+%               of the estimated source location (in m). n is number of
+%               locations.
 %
 %
 % Pina Gruden, Dec 2022, UH Manoa
@@ -21,17 +22,21 @@ X= AS_params.X;
 Y= AS_params.Y;
 xrange=AS_params.xrange;
 yrange=AS_params.yrange;
+nlocs=size(est_loc_m,1);
 
-figure; hold on;
+%figure; 
 s=pcolor(X,Y,AStotal);
+hold on;
 s.EdgeColor='none';
-clim([0,1])
+%clim([0,1])
 colorbar
 axis equal
 hph=1;
 plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
 plot(boat_pos(:,1), boat_pos(:,2),'g-','Linewidth', 1.5)
-plot(est_loc_m(1),est_loc_m(2),'r*', 'MarkerSize',10,'Linewidth', 2) 
+for n=1:nlocs
+plot(est_loc_m(n,1),est_loc_m(n,2),'r*', 'MarkerSize',10,'Linewidth', 2) 
+end
 
 xlabel(' x (m)'),ylabel('y (m)')
 legend({'Ambiguity Surface',['Sensor ', num2str(hph),' position'],'Boat track', 'Estimated source location'})
