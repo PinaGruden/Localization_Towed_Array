@@ -44,8 +44,9 @@ function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameter
 Nsources=size(Tracks_selected,2);
 
 b_col=[0 0.4470 0.7410];
-r_col=[0.8500 0.3250 0.0980];
+%r_col=[0.8500 0.3250 0.0980];
 y_col=[0.9290 0.6940 0.1250];
+g_col=[0,0,0]+0.85;
 
 if ~isempty(folder.crosscorr) % plot against cross-correlograms
 
@@ -177,8 +178,8 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
     figure,hold on;
     % Plot Pamguard detections:
     plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
-        'Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3)
-    plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',[0,0,0]+0.85)
+        'Color',g_col, 'MarkerFaceColor', g_col, 'MarkerSize', 3)
+    plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',g_col)
     % Plot All TDOA tracks
     for k=1:size(Tracks,2)
         plot(Tracks(k).time_local, Tracks(k).tdoa,'-','Color',b_col,'LineWidth',5)
@@ -207,7 +208,7 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
     h1(2) = plot(NaN, NaN,'m:','LineWidth',2);
     h1(3) = plot(NaN, NaN,'-','Color',y_col,'LineWidth',2.5);
     h1(4) = plot(NaN, NaN,'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2);
-    h1(5) = plot(NaN, NaN,'o','Color',[0,0,0]+0.85, 'MarkerFaceColor',[0,0,0]+0.85, 'MarkerSize', 3);
+    h1(5) = plot(NaN, NaN,'o','Color',g_col, 'MarkerFaceColor',g_col, 'MarkerSize', 3);
     legend(h1,'All Tracked TDOAs',['User selected cutoff ' ...
         '(\fontname{Courier}bearing\_cuttof \fontname{Helvetica}in ' ...
         '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
