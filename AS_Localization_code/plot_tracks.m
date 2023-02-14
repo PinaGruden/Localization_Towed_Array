@@ -96,7 +96,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             hold on
             for k=1:Nsources
                 plot(ax2,Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
-                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','LineWidth',1.5),
                 text(ax2,Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
                     num2str(k),'FontSize',16,'Color','k')
             end
@@ -117,6 +117,8 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
                 'Start of selected track','Location', 'southeast');
             %             set(gca,'FontSize',14)
             %             set(findall(gcf,'type','text'),'FontSize',14)
+            ss = get(0, 'Screensize'); %
+            set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
             hold off
 
         otherwise
@@ -143,7 +145,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             % Plot Selected TDOA tracks
             for k=1:Nsources
                 plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
-                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+                plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','LineWidth',1.5),
                 text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
                     num2str(k),'FontSize',16,'Color','k')
             end
@@ -163,6 +165,8 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
                 '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
                 'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
                 'Start of selected track','Location', 'southeast');
+            ss = get(0, 'Screensize'); %
+            set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
             hold off
 
@@ -189,7 +193,7 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
     % Plot Selected TDOA tracks
     for k=1:Nsources
         plot(Tracks_selected(k).time_local, Tracks_selected(k).tdoa,'-','Color',y_col,'LineWidth',2.5),
-        plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','MarkerSize', 5,'LineWidth',2),
+        plot(Tracks_selected(k).time_local(1), Tracks_selected(k).tdoa(1),'ko','MarkerFaceColor','y','LineWidth',1.5),
         text(Tracks_selected(k).time_local(1),Tracks_selected(k).tdoa(1)-0.0005, ...
             num2str(k),'FontSize',16,'Color','k')
     end
@@ -214,6 +218,8 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
         '\fontname{Courier}specify\_parameters.m\fontname{Helvetica})'], ...
         'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
         'Start of selected track','Pamguard detections','Location', 'southeast');
+    ss = get(0, 'Screensize'); %
+    set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 
     hold off
 end
