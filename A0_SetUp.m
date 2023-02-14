@@ -107,11 +107,14 @@ plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
 
 
 %//////////////////////////////////////////////////////////////////////////
-%% ////////////// 3) Get Relevant Hydrophone positions ///////////////////
+%% ////////////// 3) Get Relevant Hydrophone and Boat positions ///////////////////
 
 switch BA_params.get_hyph_pos
     case 1 % SIMUALTED GPS DATA
         [hyph_pos,x_boat,y_boat] = simulate_array_pos(Ntsteps,BA_params);
+        boat_pos(:,1)=x_boat;
+        boat_pos(:,2)=y_boat;
+        boat_start_latlong =[]; % WORK ON THIS
 
     case 2 % REAL GPS DATA
         % Get Hydrophone positions from data
@@ -122,11 +125,10 @@ switch BA_params.get_hyph_pos
                 GPSandPosition_table.Sensor2_pos_x_m(t),...
                 GPSandPosition_table.Sensor2_pos_y_m(t)]; %[x1,y1; x2,y2];
         end
-
+        boat_pos(:,1)=GPSandPosition_table.Boat_pos_x_m;
+        boat_pos(:,2)=GPSandPosition_table.Boat_pos_y_m;
+        boat_start_latlong=[GPSandPosition_table.Boat_Latitude(1),GPSandPosition_table.Boat_Longitude(1)];
 end
-
-
-
 
 
 
