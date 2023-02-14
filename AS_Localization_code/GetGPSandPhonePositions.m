@@ -1,7 +1,8 @@
 function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,array_data, Tracks, parameters, t_serialdate)
 % GetGPSandPhonePositions.m is a function that creates a table which
 % contains GPS data and hydrophone positions for a given timeframe of the
-% encounter (specified in t_serialdate).
+% encounter (specified in t_serialdate). It assumes that boat moves in a
+% straight line (boat positions are smoothed with a 1st order polynomial).
 %
 %INPUTS
 % - gps_data - a table containing GPS information. The following columns are expected:
@@ -83,6 +84,9 @@ wgs84 = wgs84Ellipsoid;
 [x,y,~] = geodetic2enu(interp_lat(:),interp_long(:),0,start_pos(1),start_pos(2),0,wgs84); %Unit is 'meter'
 % geodetic2enu - Transform geodetic coordinates to local east-north-up
 
+% 4) Smooth the boat positions:
+p = polyfit(x, y, 1);
+y = polyval(p, x);
 
 %% Get positions of the HYDROPHONES:
 %//////// DEPTH ////////////
@@ -112,17 +116,15 @@ d_s2_m = d_s1_m + parameters.d; % parameters.d = sensor separation
 d_xy = sqrt((x(2:end)-x(1:end-1)).^2+(y(2:end)-y(1:end-1)).^2);
 %sensor 1 coordinates:
 x_s1 = x(2:end) + d_s1_m.*(x(1:end-1)-x(2:end))./d_xy;
-x_s1 = [0;x_s1];
+x_s1 = [x(1) + d_s1_m.*(x(1)-x(2))/d_xy(1);x_s1];
 y_s1 = y(2:end) + d_s1_m.*(y(1:end-1)-y(2:end))./d_xy;
-y_s1 = [0;y_s1];
+y_s1 = [y(1) + d_s1_m.*(y(1)-y(2))/d_xy(1);y_s1];
 %sensor 2 coordinates:
 x_s2 = x(2:end) + d_s2_m.*(x(1:end-1)-x(2:end))./d_xy;
-x_s2 = [0;x_s2];
+x_s2 = [x(1) +  d_s2_m.*(x(1)-x(2))/d_xy(1);x_s2];
 y_s2 = y(2:end) + d_s2_m.*(y(1:end-1)-y(2:end))./d_xy;
-y_s2 = [0;y_s2];
-% This gets the sensor positions oscillating a bit around the boat
-% trajectory. Maybe need to take longer steps than one to another to
-% smooth a bit??
+y_s2 = [y(1) + d_s2_m.*(y(1)-y(2))/d_xy(1);y_s2];
+
 
 % Create a Table
 GPSandPosition_table = table(t_serialdate, Time_UTC,...
