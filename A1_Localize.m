@@ -12,7 +12,11 @@
 %              this structure).  
 % - BA_params = a structure containing parameters for the boat and array.
 %           (see specify_parameters.m for info on fields in this structure)  
-% - GPSandPosition_table = a table containing GPS and sensor information.
+% - boat_pos = boat position (in relative coordinates)- M x 2 matrix, 
+%           where M is number of time steps, and each row is [x,y] coordinate 
+%           for that time step
+% - boat_start_latlong: boat start position in latitude and longitude 
+%              (decimal degrees), 1 x 2 vector [latitude, longitude];
 % - hyph_pos = sensor positions per time step- a 2 x N x M array, where
 %           N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
 %            coordinates are considered. M = number of time steps.
@@ -33,51 +37,35 @@
 % localization for, compute localization estimate and perpendicular
 % distance to trackline - results are saved in 'Loc_table'
 
-[AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localize_tracks(Tracks_selected, ...
-    AS_params,BA_params,GPSandPosition_table,hyph_pos,timevec);
-
-
-% fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from non-dilated AS ' ...
-%     'is:\n [', repmat('%g, ', 1, numel(estim_location_m)-1), '%g] m \n and ' ...
-%     '[', repmat('%f, ', 1, numel(estim_location_m)-1), '%f]  degrees \n'], ...
-%     estim_location_m,estim_location_latlong)
-%  
-% fprintf(['Estimated location for source [', num2str(SelectedTracks),'] from dilated AS ' ...
-%     'is:\n [', repmat('%g, ', 1, numel(estim_location_m_dilated)-1), '%g] m \n and ' ...
-%     '[', repmat('%f, ', 1, numel(estim_location_m_dilated)-1), '%f]  degrees \n'], ...
-%     estim_location_m_dilated,estim_location_latlong_dilated)
-% 
-% fprintf(['Estimated perpendicular distance between trackline and source [', ...
-%     num2str(SelectedTracks),'] is: \n ', ...
-%     '%g m and %g m for non-dilated and dilated AS estimates, respectively. \n'], ...
-%     d1,d2)
+[SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localizetracks(Tracks_selected, ...
+    AS_params,BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec);
 
 %//////////////////////////////////////////////////////////////////////////
-%% //////////////////// 2) Plot ///////////////////
+%% //////////////////// 2) Plot FINAL SURFACES ///////////////////
 
-switch BA_params.get_hyph_pos
-    case 1 % SIMUALTED GPS DATA
-        boat_pos(:,1)=x_boat;
-        boat_pos(:,2)=y_boat;
-
-    case 2 % REAL GPS DATA
-        boat_pos(:,1)=GPSandPosition_table.Boat_pos_x_m;
-        boat_pos(:,2)=GPSandPosition_table.Boat_pos_y_m;
-end
-
+figure,
 % Final ambiguity surface
-for k=1:size(Loc_table,1)
-plot_AS(AStotal{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m{k});
-title (['Total ambiguity surface for source ', num2str(Loc_table.TrackID{k})])
+subplot(131)
+AStotal_S=sum(cat(3,AStotal{:}),3);
+plot_AS(AStotal_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m);
+title ('Total ambiguity surface for all sources')
 
 % Final ambiguity surface with dilation
-plot_AS(ASdilatetotal{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated{k});
-title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table.TrackID{k})])
+subplot(132)
+ASdilatetotal_S=sum(cat(3,ASdilatetotal{:}),3);
+plot_AS(ASdilatetotal_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+title ('Total ambiguity surface with dilation for all sources')
 
 % Final surface with intersecting hyperbolas
-plot_AS(AStotal_hyperbolas{k},AS_params,hyph_pos,boat_pos,Loc_table.Loc_m{k});
-title (['Intersecting hyperbolas for source ', num2str(Loc_table.TrackID{k})])
-end
+subplot(133)
+AStotal_hyperbolas_S=sum(cat(3,AStotal_hyperbolas{:}),3);
+plot_AS(AStotal_hyperbolas_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+title ('Intersecting hyperbolas for all sources')
+
+%Make the figure big
+ss = get(0, 'Screensize'); %
+set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+
 
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 3) Save ///////////////////
