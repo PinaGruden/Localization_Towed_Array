@@ -38,7 +38,7 @@ mean_horiz_swimspeed = AS_params.mean_horiz_swimspeed;
 timestep = BA_params.timestep;
 
 Ntsteps = size(tdoa_measured_select,2); %number of time steps
-N= size(wpos,1); %number of grid points to evaluate
+% N= size(wpos,1); %number of grid points to evaluate
 
 %~~~~~~~ 1) Get time step when animal is closest to 90deg (tdoa=0s)~~~~~~~~
 % This is for the purpose of Surface Dilation
@@ -47,10 +47,10 @@ tsteps=1:1:Ntsteps;
 tstep90=tsteps(ind); % time step whenanimal is closest to the beam 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2) Pre-allocate ~~~~~~~~~~~~~~~~~~~~~~~~~~
-AS_select= nan(1,N,Ntsteps);
-AS_Hyperbolas = AS_select;
-ASdilate = nan(Ngp_y,Ngp_x,Ntsteps); %swap x and y inpuput arguments since 
+AS_select= nan(Ngp_y,Ngp_x,Ntsteps);%swap x and y inpuput arguments since 
 % reshape() will be used to fill in the values
+AS_Hyperbolas = AS_select;
+ASdilate = AS_select;
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3) Compute AS ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +67,7 @@ for t=1:Ntsteps % for each time step compute LS
         dt1= 1/c.*sqrt((rp(ip1,1)-wpos(:,1)).^2 +(rp(ip1,2)-wpos(:,2)).^2);
         dt2= 1/c.*sqrt((rp(ip2,1)-wpos(:,1)).^2 +(rp(ip2,2)-wpos(:,2)).^2);
         tdoa_model=dt1-dt2;
+        tdoa_model=reshape(tdoa_model,[Ngp_y,Ngp_x]);
 
         tdoa_diff=(tdoa_model-tdoa_measured_select(:,t)).^2;
         AS_select(:,:,t)= exp(-1/(2*sig^2).*tdoa_diff);
@@ -74,7 +75,7 @@ for t=1:Ntsteps % for each time step compute LS
 
         %///////////////////DILATE SURFACES////////////////////////////////
         % Apply Surface dilation filter (imdilate) to compensate for whale movement:
-        AStotal_temp=reshape(AS_select(:,:,t),[Ngp_y,Ngp_x]);
+        AStotal_temp=AS_select(:,:,t);
         dt90 = timestep*abs(t-tstep90); %Elapsed time from when animals are at 90deg (0 tdoa) [s]
         if dt90==0
 
@@ -117,14 +118,12 @@ end
 clear AStotal_temp
 
 % Get total AS without dilation:
-AStotal_temp=prod(AS_select,3,'omitnan');
-AStotal=reshape(AStotal_temp,[Ngp_y,Ngp_x]);
+AStotal=prod(AS_select,3,'omitnan');
 
 % Get total AS with dilation:
 ASdilatetotal=prod(ASdilate,3,'omitnan');
 
 % Get intersecting hyperbolas:
-AStotal_hyperbolas_temp = sum(AS_Hyperbolas,3,'omitnan');
-AStotal_hyperbolas = reshape(AStotal_hyperbolas_temp,[Ngp_y,Ngp_x]);
+AStotal_hyperbolas = sum(AS_Hyperbolas,3,'omitnan');
 
 end
