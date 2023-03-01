@@ -59,7 +59,7 @@ title ('Total ambiguity surface with dilation for all sources')
 % Final surface with intersecting hyperbolas
 subplot(133)
 AStotal_hyperbolas_S=sum(cat(3,AStotal_hyperbolas{:}),3);
-plot_AS(AStotal_hyperbolas_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+plot_AS(AStotal_hyperbolas_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m);
 title ('Intersecting hyperbolas for all sources')
 
 %Make the figure big
