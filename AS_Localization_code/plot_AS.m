@@ -20,8 +20,8 @@ function plot_AS(AStotal,AS_params,hyph_pos,boat_pos,est_loc_m)
 
 X= AS_params.X;
 Y= AS_params.Y;
-xrange=AS_params.xrange;
-yrange=AS_params.yrange;
+xrange=[min(min(AS_params.X)),max(max(AS_params.X))];
+yrange=[min(min(AS_params.Y)),max(max(AS_params.Y))];
 nlocs=size(est_loc_m,1);
 
 %figure; 

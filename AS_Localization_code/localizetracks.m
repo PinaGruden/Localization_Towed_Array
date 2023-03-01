@@ -1,4 +1,4 @@
-function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localizetracks(Tracks_selected,AS_params, ...
+function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected,AS_params, ...
     BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec)
 % localizetracks.m is a function that localizes user selected TDOA
 % tracks/track segments. It plots them as they are localized and user has
@@ -66,6 +66,7 @@ SelectedTracks=cell(N,1);
 AStotal=cell(N,1);
 ASdilatetotal=cell(N,1);
 AStotal_hyperbolas=cell(N,1);
+NewGrid=cell(N,1);
 Loc_table=[];
 r_col=[0.8500 0.3250 0.0980];
 g_col=[0,0,0]+0.6;
@@ -76,7 +77,7 @@ k=1;
 
 while continue_localize ~=0 %to allow multiple groups to be localized consecutevly
 
-[SelectedTracks{k},AStotal{k},ASdilatetotal{k},AStotal_hyperbolas{k},Loc_table_temp] = localize_track(Tracks_selected, ...
+[SelectedTracks{k},AStotal{k},ASdilatetotal{k},AStotal_hyperbolas{k},Loc_table_temp,NewGrid{k}] = localize_track(Tracks_selected, ...
     AS_params,BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec);
 
 % /////////////// Plot selected TDOAs and Localizations///////////
@@ -94,17 +95,17 @@ end
 fig=figure;
 subplot(131)
 % Final surface with intersecting hyperbolas
-plot_AS(AStotal_hyperbolas{k},AS_params,hyph_pos,boat_pos,Loc_table_temp.Loc_m);
+plot_AS(AStotal_hyperbolas{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m);
 title (['Intersecting hyperbolas for source ', num2str(Loc_table_temp.TrackID{:})])
 
 subplot(132)
 % Final ambiguity surface
-plot_AS(AStotal{k},AS_params,hyph_pos,boat_pos,Loc_table_temp.Loc_m);
+plot_AS(AStotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m);
 title (['Total ambiguity surface for source ', num2str(Loc_table_temp.TrackID{:})])
 
 subplot(133)
 % Final ambiguity surface with dilation
-plot_AS(ASdilatetotal{k},AS_params,hyph_pos,boat_pos,Loc_table_temp.Loc_m_dilated);
+plot_AS(ASdilatetotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m_dilated);
 title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table_temp.TrackID{:})])
 
 %Make the figure big
@@ -138,6 +139,7 @@ keep_loc = input(['Do you want to keep this localization? ' ...
         AStotal{k}=[];
         ASdilatetotal{k}=[];
         AStotal_hyperbolas{k}=[];
+        NewGrid{k}=[];
 
         %close the plotted localizations
         close(fig) 
@@ -175,4 +177,5 @@ SelectedTracks=SelectedTracks(1:k);
 AStotal=AStotal(1:k);
 ASdilatetotal=ASdilatetotal(1:k);
 AStotal_hyperbolas=AStotal_hyperbolas(1:k);
+NewGrid=NewGrid(1:k);
 end

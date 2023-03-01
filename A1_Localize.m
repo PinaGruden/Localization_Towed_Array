@@ -37,7 +37,7 @@
 % localization for, compute localization estimate and perpendicular
 % distance to trackline - results are saved in 'Loc_table'
 
-[SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table] = localizetracks(Tracks_selected, ...
+[SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected, ...
     AS_params,BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec);
 
 %//////////////////////////////////////////////////////////////////////////
@@ -47,19 +47,19 @@ figure,
 % Final ambiguity surface
 subplot(131)
 AStotal_S=sum(cat(3,AStotal{:}),3);
-plot_AS(AStotal_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m);
+plot_AS(AStotal_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m);
 title ('Total ambiguity surface for all sources')
 
 % Final ambiguity surface with dilation
 subplot(132)
 ASdilatetotal_S=sum(cat(3,ASdilatetotal{:}),3);
-plot_AS(ASdilatetotal_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+plot_AS(ASdilatetotal_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
 title ('Total ambiguity surface with dilation for all sources')
 
 % Final surface with intersecting hyperbolas
 subplot(133)
 AStotal_hyperbolas_S=sum(cat(3,AStotal_hyperbolas{:}),3);
-plot_AS(AStotal_hyperbolas_S,AS_params,hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+plot_AS(AStotal_hyperbolas_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
 title ('Intersecting hyperbolas for all sources')
 
 %Make the figure big
