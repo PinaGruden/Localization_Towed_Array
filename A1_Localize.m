@@ -70,4 +70,5 @@ set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 3) Save ///////////////////
 
-save([folder2save2,'Results.mat'],'Loc_table','AStotal','ASdilatetotal','AStotal_hyperbolas')
+save([folder2save2,'Results.mat'],'Loc_table','AStotal','ASdilatetotal', ...
+    'AStotal_hyperbolas', 'NewGrid','hyph_pos','boat_pos')
