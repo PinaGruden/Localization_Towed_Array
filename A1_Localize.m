@@ -64,7 +64,7 @@ title ('Intersecting hyperbolas for all sources')
 
 %Make the figure big
 ss = get(0, 'Screensize'); %
-set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+set(gcf, 'Position', [ss(1) ss(4)/2-100 ss(3) ss(4)/2]);
 
 
 %//////////////////////////////////////////////////////////////////////////

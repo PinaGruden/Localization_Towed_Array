@@ -118,7 +118,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             %             set(gca,'FontSize',14)
             %             set(findall(gcf,'type','text'),'FontSize',14)
             ss = get(0, 'Screensize'); %
-            set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+            set(gcf, 'Position', [ss(1) ss(4)/2-100 ss(3) ss(4)/2]); % [left bottom width height] - move the bottom down a bit so that it's not all the way to the top.
             hold off
 
         otherwise
@@ -166,7 +166,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
                 'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
                 'Start of selected track','Location', 'southeast');
             ss = get(0, 'Screensize'); %
-            set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+            set(gcf, 'Position', [ss(1) ss(4)/2-100 ss(3) ss(4)/2]);
 
             hold off
 
@@ -219,7 +219,7 @@ if ~isempty(folder.pamguard) % Plot against Pamguard detections
         'Selected TDOAs (based on \fontname{Courier}bearing\_cuttof\fontname{Helvetica})', ...
         'Start of selected track','Pamguard detections','Location', 'southeast');
     ss = get(0, 'Screensize'); %
-    set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+    set(gcf, 'Position', [ss(1) ss(4)/2-100 ss(3) ss(4)/2]);
 
     hold off
 end

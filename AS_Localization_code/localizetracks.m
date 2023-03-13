@@ -110,7 +110,7 @@ title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table_te
 
 %Make the figure big
 ss = get(0, 'Screensize'); %
-set(gcf, 'Position', [ss(1) ss(4)/2 ss(3) ss(4)/2]);
+set(gcf, 'Position', [ss(1) ss(4)/2-100 ss(3) ss(4)/2]); % [left bottom width height] - move the bottom down a bit so that it's not all the way to the top.
 
 drawnow
 % /////////////// Keep the selected group and localizations? ///////////
