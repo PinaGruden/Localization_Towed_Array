@@ -35,7 +35,7 @@ hph=1;
 plot(squeeze(hyph_pos(hph,1,:)),squeeze(hyph_pos(hph,2,:)),'r-','Linewidth', 3)
 plot(boat_pos(:,1), boat_pos(:,2),'g-','Linewidth', 1.5)
 for n=1:nlocs
-plot(est_loc_m(n,1),est_loc_m(n,2),'r*', 'MarkerSize',10,'Linewidth', 2) 
+plot(est_loc_m(n,1),est_loc_m(n,2),'ro', 'MarkerSize',10,'Linewidth', 2) 
 end
 
 xlabel(' x (m)'),ylabel('y (m)')
