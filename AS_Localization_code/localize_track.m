@@ -99,11 +99,13 @@ toc
 % Select tallest peak as localization (since it's biambigous)
 % ----------------Non-dilated surfaces-------------------
 % Marginalize along x-axis
-x_marg= max(AStotal,[],1);
+%x_marg= max(AStotal,[],1);
+x_marg= sum(AStotal,1);
 [~,locs_x]=findpeaks(x_marg,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
 
 % Marginalize along y-axis
-y_marg=max(AStotal,[],2);
+% y_marg=max(AStotal,[],2);%
+y_marg=sum(AStotal,2);
 [pks_y,locs_y]=findpeaks(y_marg,AS_params.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
 
 estim_location_m_rotd = [locs_x(:),locs_y(:)];
@@ -111,11 +113,11 @@ estim_location_m_rotd = [locs_x(:),locs_y(:)];
 
 %------------------ Dilated surfaces----------------------
 % Marginalize along x-axis
-x_marg_dilate= max(ASdilatetotal,[],1);
+x_marg_dilate= sum(ASdilatetotal,1);
 [~,locs_x]=findpeaks(x_marg_dilate,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
 
 % Marginalize along y-axis
-y_marg_dilate=max(ASdilatetotal,[],2);
+y_marg_dilate=sum(ASdilatetotal,2);
 [pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,AS_params.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
 
 estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
@@ -170,20 +172,49 @@ d_m_dilated_high=AS_params.Y(ind_ymarg(end),1);
 %//////////////////////////////////////////////////////////////////////////
 %% /////////////// 6) REVERSE rotation of the coordinate grid ////////////// 
 
-%Reverse the rotation and recover y-offset:
+%---------Reverse the rotation and recover y-offset:----------
+% -------- plus get min, max positions based on min, max distance-------
+
+%~~~~~~~~~~~~~~~~~~~~~~ Non-dialted ~~~~~~~~~~~~~~~~~~~~~ 
+% - Position
 estim_location_m_shift=(rotmatfnc(phi)*estim_location_m_rotd')';
 estim_location_m=estim_location_m_shift;
 estim_location_m(:,2)=estim_location_m_shift(:,2)+p(1);
 
+% - Position min
+estim_location_m_shift_low=(rotmatfnc(phi)*[estim_location_m_rotd(1),d_m_low]')';
+estim_location_m_low=estim_location_m_shift_low;
+estim_location_m_low(:,2)=estim_location_m_shift_low(:,2)+p(1);
+
+% - Poisition max
+estim_location_m_shift_hi=(rotmatfnc(phi)*[estim_location_m_rotd(1),d_m_high]')';
+estim_location_m_hi=estim_location_m_shift_hi;
+estim_location_m_hi(:,2)=estim_location_m_shift_hi(:,2)+p(1);
+
+
+%~~~~~~~~~~~~~~~~~~~~~~ Dilated ~~~~~~~~~~~~~~~~~~~~~~
+% - Position
 estim_location_m_dilated_shift=(rotmatfnc(phi)*estim_location_m_dilated_rotd')';
 estim_location_m_dilated=estim_location_m_dilated_shift;
 estim_location_m_dilated(:,2)=estim_location_m_dilated_shift(:,2)+p(1);
 
-% Get lat long of the non-rotated localizations:
+% - Position min
+estim_location_m_dilated_shift_low=(rotmatfnc(phi)*[estim_location_m_dilated_rotd(1),d_m_dilated_low]')';
+estim_location_m_dilated_low=estim_location_m_dilated_shift_low;
+estim_location_m_dilated_low(:,2)=estim_location_m_dilated_shift_low(:,2)+p(1);
+
+% - Poisition max
+estim_location_m_dilated_shift_hi=(rotmatfnc(phi)*[estim_location_m_dilated_rotd(1),d_m_dilated_high]')';
+estim_location_m_dilated_hi=estim_location_m_dilated_shift_hi;
+estim_location_m_dilated_hi(:,2)=estim_location_m_dilated_shift_hi(:,2)+p(1);
+
+
+
+%-------------- Get lat long of the non-rotated localizations: ------------
 estim_location_latlong = M2LatLon(estim_location_m,[boat_start_latlong(1),boat_start_latlong(2)]);
 estim_location_latlong_dilated = M2LatLon(estim_location_m_dilated,[boat_start_latlong(1),boat_start_latlong(2)]);
 
-% Get new gridpoints of non-rotated grid:
+%--------------- Get new gridpoints of non-rotated grid:------------------
 new_xy= (rotmatfnc(phi)*[AS_params.wpos]')';
 X_new=reshape(new_xy(:,1),size(AS_params.X));
 Y_new=reshape(new_xy(:,2),size(AS_params.Y));
@@ -193,9 +224,13 @@ NewGrid.Y=Y_new;
 %//////////////////////////////////////////////////////////////////////////
 %% /////////////// 7) Create a table with localization info ////////////// 
 
-Loc_table = table({SelectedTracks},estim_location_m,estim_location_latlong, ...
-    estim_location_m_dilated,estim_location_latlong_dilated,d_m,[d_m_low,d_m_high],d_m_dilated,[d_m_dilated_low,d_m_dilated_high], ...
-    'VariableNames',{'TrackID','Loc_m','Loc_LatLong','Loc_m_dilated', ...
-    'Loc_LatLong_dilated','distance_m','distance_m_minmax','distance_m_dilated','distance_m_dilated_minmax'});
+Loc_table = table({SelectedTracks}, ...
+    estim_location_m,estim_location_m_low,estim_location_m_hi,estim_location_latlong, ...
+    estim_location_m_dilated,estim_location_m_dilated_low,estim_location_m_dilated_hi,estim_location_latlong_dilated, ...
+    d_m,[d_m_low,d_m_high],d_m_dilated,[d_m_dilated_low,d_m_dilated_high], ...
+    'VariableNames',{'TrackID', ...
+    'Loc_m','Loc_m_min','Loc_m_max','Loc_LatLong', ...
+    'Loc_m_dilated','Loc_m_dilated_min','Loc_m_dilated_max','Loc_LatLong_dilated', ...
+    'distance_m','distance_m_minmax','distance_m_dilated','distance_m_dilated_minmax'});
 
 end
