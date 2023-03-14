@@ -48,18 +48,32 @@ figure,
 subplot(131)
 AStotal_S=sum(cat(3,AStotal{:}),3);
 plot_AS(AStotal_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m);
+hold on, line([Loc_table.Loc_m_min(1),Loc_table.Loc_m_max(1)], ...
+    [Loc_table.Loc_m_min(2),Loc_table.Loc_m_max(2)], ...
+    'Color','red','LineStyle','--', 'LineWidth', 2)
+hl = legend;
+hl.String{end} = 'Estimated perpendicular error bounds';  
+hl.Location='northoutside';
 title ('Total ambiguity surface for all sources')
 
 % Final ambiguity surface with dilation
 subplot(132)
 ASdilatetotal_S=sum(cat(3,ASdilatetotal{:}),3);
 plot_AS(ASdilatetotal_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m_dilated);
+hold on, line([Loc_table.Loc_m_dilated_min(1),Loc_table.Loc_m_dilated_max(1)], ...
+    [Loc_table.Loc_m_dilated_min(2),Loc_table.Loc_m_dilated_max(2)], ...
+    'Color','red','LineStyle','--', 'LineWidth', 2)
+hl = legend;
+hl.String{end} = 'Estimated perpendicular error bounds';  
+hl.Location='northoutside';
 title ('Total ambiguity surface with dilation for all sources')
 
 % Final surface with intersecting hyperbolas
 subplot(133)
 AStotal_hyperbolas_S=sum(cat(3,AStotal_hyperbolas{:}),3);
 plot_AS(AStotal_hyperbolas_S,NewGrid{1},hyph_pos,boat_pos,Loc_table.Loc_m);
+hl = legend;
+hl.Location='northoutside';
 title ('Intersecting hyperbolas for all sources')
 
 %Make the figure big

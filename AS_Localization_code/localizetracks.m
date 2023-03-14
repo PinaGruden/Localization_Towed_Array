@@ -101,11 +101,21 @@ title (['Intersecting hyperbolas for source ', num2str(Loc_table_temp.TrackID{:}
 subplot(132)
 % Final ambiguity surface
 plot_AS(AStotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m);
+hold on, line([Loc_table_temp.Loc_m_min(1),Loc_table_temp.Loc_m_max(1)], ...
+    [Loc_table_temp.Loc_m_min(2),Loc_table_temp.Loc_m_max(2)], ...
+    'Color','red','LineStyle','--', 'LineWidth', 2)
+hl = legend;
+hl.String{end} = 'Estimated perpendicular error bounds';  
 title (['Total ambiguity surface for source ', num2str(Loc_table_temp.TrackID{:})])
 
 subplot(133)
 % Final ambiguity surface with dilation
 plot_AS(ASdilatetotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m_dilated);
+hold on, line([Loc_table_temp.Loc_m_dilated_min(1),Loc_table_temp.Loc_m_dilated_max(1)], ...
+    [Loc_table_temp.Loc_m_dilated_min(2),Loc_table_temp.Loc_m_dilated_max(2)], ...
+    'Color','red','LineStyle','--', 'LineWidth', 2)
+hl = legend;
+hl.String{end} = 'Estimated perpendicular error bounds';  
 title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table_temp.TrackID{:})])
 
 %Make the figure big
