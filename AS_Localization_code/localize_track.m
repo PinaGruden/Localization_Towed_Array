@@ -58,6 +58,8 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 
 
 %//////////////////////////////////////////////////////////////////////////
+loc_pos=0;
+while loc_pos~=1
 %% /////////////////////1) Select TDOA track ///////////////////
 % Select which TDOA track or which fragments you want to compute
 % localization for
@@ -84,7 +86,7 @@ hyph_pos_shift=hyph_pos;
 hyph_pos_shift(:,2,:)= hyph_pos_shift(:,2,:)-p(2);
 
 %get rotated boat and hydrophone positions:
-boat_pos_rotd=(rotmatfnc(-phi)*boat_pos_shift')';
+%boat_pos_rotd=(rotmatfnc(-phi)*boat_pos_shift')';
 hyph_pos_rotd= pagetranspose(pagemtimes(rotmatfnc(-phi),pagetranspose(hyph_pos_shift(:,:,:))));
 
 %//////////////////////////////////////////////////////////////////////////
@@ -133,6 +135,20 @@ estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
 % estim_location_m_dilated = [AS_params.X(ind_max_peak),AS_params.Y(ind_max_peak)];
 % estim_location_latlong_dilated = M2LatLon(estim_location_m_dilated,[boat_start_latlong(1),boat_start_latlong(2)]);
 
+% Check if localization can be obtained- i.e. there is sufficient change in
+% bearings:
+% 
+if size(estim_location_m_rotd,2)<2 || size(estim_location_m_dilated_rotd,2)<2 % Not sufficient change in bearings - localization not possible
+    loc_pos=0;
+errorMsg = "Localization not possible. \n" + ...
+    "Selected track(s) do not result in a sufficient bearing change for successfull localization. \n" + ...
+    "Try again. \n";
+fprintf(2,errorMsg)
+else % Sufficient change in bearings - localization possible
+    loc_pos=1;
+end
+
+end
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 5) Compute perpendicular distance ///////////////////
 
