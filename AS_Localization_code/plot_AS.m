@@ -72,7 +72,9 @@ s{5}=s{5}';
 
 xlabel(' x (m)'),ylabel('y (m)')
 warning('off','MATLAB:legend:IgnoringExtraEntries')
-legend([s{1:n}],{'Ambiguity Surface',['Sensor ', num2str(hph),' position'],'Boat track', 'Estimated source location', 'Estimated perpendicular error bounds'})
+legend([s{1:n}],{'Ambiguity Surface',['Sensor ', num2str(hph),' position'], ...
+    'Boat track', 'Estimated source location', 'Estimated perpendicular error bounds'}, ...
+    'Location','northoutside')
 xlim([xrange(1),xrange(2)])
 ylim([yrange(1),yrange(2)])
 set(gca,'FontSize',16)
