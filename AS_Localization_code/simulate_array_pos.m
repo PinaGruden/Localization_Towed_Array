@@ -33,7 +33,6 @@ function [hyph_pos,x_boat, y_boat] = simulate_array_pos(Ntsteps,params)
         hyph_pos(1,1,:)=x_boat(1:end-1);
         hyph_pos(1,2,:)=y_boat(1:end-1);
         %second sensor is distance d behind first
-        %hyph_pos(2,1,:)=hyph_pos(1,1,1:end-1) - d.*(hyph_pos(1,1,2:end)-hyph_pos(1,1,1:end-1))./dxy_line;
         hyph_pos(2,1,:)=x_boat(1:end-1) - params.d.*(x_boat(2:end)-x_boat(1:end-1))./dxy_line;
         hyph_pos(2,2,:)=params.mb.*hyph_pos(2,1,:)+params.b;
 

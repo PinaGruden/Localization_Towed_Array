@@ -96,23 +96,6 @@ for t=1:Ntsteps % for each time step compute LS
         end
         %//////////////////////////////////////////////////////////////////
 
-%         %Plot surfaces:
-%         if any(count==plotf)
-%             figure,hold on
-%             LStotal_temp=reshape(LS_select(:,:,t),[Ngp_y,Ngp_x]);
-%             s=pcolor(X,Y,LStotal_temp);
-%             s.EdgeColor='none';
-%             clim([0,1])
-%             axis equal
-%             plot(rp(ip1,1),rp(ip1,2),'r^','MarkerFaceColor','r'),hold on
-%             plot(rp(ip2,1),rp(ip2,2),'r^','MarkerFaceColor','r')
-%             colorbar
-%             xlabel(' x (m)'),ylabel('y (m)')
-%             title(['LS for selected source, time step ', num2str(t)])
-%         end
-% 
-%         count=count+1;
-
     end
 end
 clear AStotal_temp

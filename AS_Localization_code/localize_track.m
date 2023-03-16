@@ -124,16 +124,6 @@ y_marg_dilate=sum(ASdilatetotal,2);
 
 estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
 
-% Select two largest peaks:
-% maxval=maxk(AStotal(:),2); %find two largest peaks in the ambiguity surface
-% ind_max_peak = [find(AStotal==maxval(1));find(AStotal==maxval(2))]; %indices of 2 maximum peaks
-% estim_location_m = [AS_params.X(ind_max_peak),AS_params.Y(ind_max_peak)];
-% estim_location_latlong = M2LatLon(estim_location_m,[boat_start_latlong(1),boat_start_latlong(2)]);
-% 
-% maxval=maxk(ASdilatetotal(:),2); %find two largest peaks in the dilated ambiguity surface
-% ind_max_peak = [find(ASdilatetotal==maxval(1));find(ASdilatetotal==maxval(2))]; %indices of 2 maximum peaks
-% estim_location_m_dilated = [AS_params.X(ind_max_peak),AS_params.Y(ind_max_peak)];
-% estim_location_latlong_dilated = M2LatLon(estim_location_m_dilated,[boat_start_latlong(1),boat_start_latlong(2)]);
 
 % Check if localization can be obtained- i.e. there is sufficient change in
 % bearings:
@@ -173,7 +163,7 @@ d_m_dilated_high=AS_params.Y(ind_ymarg(end),1);
 %-----------------------------------------------------------------
 % The result can be checked by running the following (also if you dont
 % rotate coordinates that's how you compute the distance):
-% %g et coefficients for a line equation for a boat:
+% %get coefficients for a line equation for a boat:
 % p=polyfit(boat_pos_rotd(:,1),boat_pos_rotd(:,2),1);
 % % p =[p1,p0] - where p1= slope and p0= intercept (coeffs of p are in
 % % descending powers)

@@ -44,6 +44,5 @@ end
 selected_indx=sum(selected_indx,1);
 tdoa_select=sum(tdoa_measured(SelectedTracks,:),1,'omitnan');
 tdoa_select(selected_indx==0)=NaN;
-% tdoa_select(all(isnan(tdoa_measured(SelectedTracks,:)),1)) = NaN;
 
 end
