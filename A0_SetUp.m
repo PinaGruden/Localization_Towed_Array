@@ -24,6 +24,9 @@ addpath AS_Localization_code/
 %   available)
 if ~isempty(folder.pamguard)
     files =dir(fullfile(folder.pamguard,'*.mat'));
+    % elimanate OS-X generated files
+    idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+    files=files(idx);
     N=size(files,1);
     for k=1:N
         load([folder.pamguard,files(k).name],'All_data_*','parameters')
@@ -35,6 +38,9 @@ end
 %   ii) Load data/tracks extracted by the TDOA tracking package:
 %       Load TDOA tracks:
 files =dir(fullfile(folder.tdoas,'*.mat'));
+% elimanate OS-X generated files
+idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+files=files(idx);
 for k=1:size(files,1)
     load([folder.tdoas,files(k).name],'Tracks','parameters','scalar_*')
 end
@@ -42,6 +48,9 @@ end
 %       Load Cross-correlograms for plotting (if available):
 if ~isempty(folder.crosscorr)
     files =dir(fullfile(folder.crosscorr,'*.mat'));
+    % elimanate OS-X generated files
+    idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+    files=files(idx);
     N=size(files,1);
     Rxy_envelope_both=cell(1,N);
     for k=1:N

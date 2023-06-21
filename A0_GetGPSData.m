@@ -20,6 +20,9 @@ if ~isempty(folder.rawgps)
     % LOAD all tables in the raw gps data folder (array, sensor depth and
     % gps info):
     files =dir(fullfile(folder.rawgps,'*.csv'));
+    % elimanate OS-X generated files
+    idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+    files=files(idx);
     fname   = {files.name};
     fname(~cellfun('isclass', fname, 'char')) = {''};  % Care for non-strings
     
@@ -41,8 +44,14 @@ if ~isempty(folder.rawgps)
     % LOAD extracted TDOA Tracks, parameters, and time data (from TDOA 
     % tracking master package):
     files =dir(fullfile(folder.tdoas,'*.mat'));
+    % elimanate OS-X generated files
+    idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+    files=files(idx);
     load([folder.tdoas,files.name],'Tracks','parameters')
     files =dir(fullfile(folder.crosscorr,'*.mat'));
+    % elimanate OS-X generated files
+    idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
+    files=files(idx);
     load([folder.crosscorr,files(1).name],'t_serialdate') % the time vector is the same regardless which file from the same encounter we load
     t_serialdate=t_serialdate(:);
 
