@@ -62,9 +62,10 @@ AS_params.sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 
 %----------------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-AS_params.xrange=[-300,5000]; % x range in m
+AS_params.xrange=[-300,5000]; % x range in m [min,max]
 AS_params.yrange=[0,7000]; % y range in m (since boat track will be rotated
-% around x-axis, and localization is bi-ambigous specify positive y-range)
+% around x-axis, and localization is bi-ambigous specify positive y-range).
+% The max should be maximum distance you expect to still localize your signal 
 AS_params.dx=10; % grid step size in m (resolution) in x direction
 AS_params.dy=10;% grid step size in m (resolution) in y direction
 % - Speed of sound
