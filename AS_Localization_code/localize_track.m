@@ -1,27 +1,26 @@
-function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localize_track(Tracks,AS_params,BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec)
+function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localize_track(Tracks,AS_params,BA_params,timevec)
 %function localize_tracks.m localizes a selected TDOA track (or a gourp of
 %track segments) using the ambiguity surfaces (AS) and returns computed surfaces
 %along with the localization and perpendicular distance information.
 %
 %INPUTS:
 % - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
-%                   ~ time - a vector of times (starting at 0) for a given
-%                           track
-%                   ~ time_local- a vector of times (serial date format) for a
-%                           given track                          
-%                   ~ tdoa - a vector of tdoas for a given track
+%         ~ time - a vector of times (starting at 0) for a given track                          
+%         ~ time_local- a vector of times (serial date format) for a given track  
+%         ~ tdoa - a vector of tdoas for a given track
 % - AS_params: a structure containing parameters for ambiguity surface 
 %              computation. (see specify_parameters.m for info on fields in
 %              this structure)  
-% - BA_params:a structure containing parameters for the boat and array.
-%           (see specify_parameters.m for info on fields in this structure)  
-% - boat_pos : boat position (in relative coordinates)- M x 2 matrix, 
-%           where M is number of time steps, and each row is [x,y] coordinate 
-%           for that time step
-% - boat_start_latlong: boat start position in latitude and longitude 
+% - BA_params:a structure containing parameters for the boat and array 
+%           (see specify_parameters.m for detailed info on fields in this 
+%           structure) - it includes:
+%       ~ boat_pos : boat position (in relative coordinates)- M x 2 matrix, 
+%         where M is number of time steps, and each row is [x,y] coordinate 
+%         for that time step
+%       ~ boat_start_latlong: boat start position in latitude and longitude 
 %              (decimal degrees), 1 x 2 vector [latitude, longitude];
-% - hyph_pos: two sensor positions per time step- a 2 x N x M array, where
-%           N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
+%       ~ hyph_pos: two sensor positions per time step- a 2 x N x M array, 
+%           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
 %            coordinates are considered. M = number of time steps.         
 % - timevec : a 1 x M vector of times that covers the duration of the encounter  
 %
@@ -55,7 +54,9 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 %Pina Gruden January 2023
 
 
-
+boat_pos=BA_params.boat_pos;
+hyph_pos=BA_params.hyph_pos;
+boat_start_latlong=BA_params.boat_start_latlong;
 
 %//////////////////////////////////////////////////////////////////////////
 loc_pos=0;

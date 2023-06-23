@@ -1,6 +1,6 @@
 function [AS_params,BA_params] = specify_parameters(parameters)
 % Specify parameters for towed array localization:
-% Make sure you change/adjust parameters under captions "Changable"
+% Make sure you change/adjust parameters under ALL captions called "Changable"
 %
 %INPUTS:
 % - parameters : a structure containing array and encounter info (used to
@@ -8,6 +8,11 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 %   ~ c : speed of sound - a scalar 
 %   ~ d : distance between the two sensors - a scalar
 %   ~ dt : how much time elapses in each time step in s - a scalar
+%   ~ get_hyph_pos : a scalar indicating whether simulated or real
+%                  GPS data is used (1 = simulated; 2 = real)
+%       - When get_hyph_pos==2, optional input is also
+%           ~ GPSTable: Table containing GPS data 
+%   ~ Ntsteps : a scalar indicating how many time steps are in the data
 %
 %OUTPUTS:
 % - AS_params= a structure containing parameters for ambiguity surface 
@@ -43,13 +48,84 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 %           * boatspeed: boat speed in m/s
 %           * timestep :how much time elapses in each time step in s 
 %           * d : distance between the sensors
+%           * hyph_pos - sensor positions per time step- a 2 x N x M array, 
+%           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
+%            coordinates are considered. M = number of time steps.
+%           * boat_pos - boat position (in relative coordinates)- M x 2 matrix, 
+%           where M is number of time steps, and each row is [x,y] coordinate 
+%           for that time step
+%           * boat_start_latlong - boat start position in latitude and longitude 
+%              (decimal degrees), 1 x 2 vector [latitude, longitude];
 %       - When get_hyph_pos==2 the following fields are included:
 %           * timestep :how much time elapses in each time step in s
+%           * hyph_pos - sensor positions per time step- a 2 x N x M array, 
+%           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
+%            coordinates are considered. M = number of time steps.
+%           * boat_pos - boat position (in relative coordinates)- M x 2 matrix, 
+%           where M is number of time steps, and each row is [x,y] coordinate 
+%           for that time step
+%           * boat_start_latlong - boat start position in latitude and longitude 
+%              (decimal degrees), 1 x 2 vector [latitude, longitude];
 %
 %
 %Pina Gruden, Dec 2022, UH Manoa
 
 %% //////////////////// SET PARAMETERS //////////////////// 
+
+
+%///////////////////// PARAMETERS for the BOAT and ARRAY /////////////////
+
+% ~~~~~~~~~~~~~~~~~~~~~~~CHANGABLE:~~~~~~~~~~~~~~~~~~~~~~~~
+% Choose either: 
+% get_hyph_pos = 1 to simulate boat movement and hydrophone positions.
+% get_hyph_pos = 2 to use the real data
+
+BA_params.get_hyph_pos = parameters.get_hyph_pos; 
+
+if BA_params.get_hyph_pos==1
+    boatspeed_kts = 10; % boat speed in knots
+    %specify line gradient and intersect along which the boat moves:
+    BA_params.mb=-0.5; % line gradient
+    BA_params.b=10; %intersect with y axis
+end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~COMPUTED:~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+switch BA_params.get_hyph_pos
+
+    case 1 % SIMUALTED GPS DATA
+        BA_params.boatspeed= boatspeed_kts/1.944; %boat speed in m/s
+        BA_params.timestep = parameters.dt; % how much time elapses in each time step in s 
+        BA_params.d = parameters.d; % distance between the sensors
+        [hyph_pos,x_boat,y_boat] = simulate_array_pos(parameters.Ntsteps,BA_params);
+        BA_params.hyph_pos=hyph_pos;
+        boat_pos(:,1)=x_boat;
+        boat_pos(:,2)=y_boat;
+        BA_params.boat_pos=boat_pos;
+        BA_params.boat_start_latlong =[20.4606,-156.9508];
+
+    case 2 % REAL GPS DATA
+        GPSandPosition_table=parameters.GPSTable;
+        BA_params.timestep = parameters.dt; % how much time elapses in each time step in s
+        % Get Hydrophone positions from data
+        hyph_pos=nan(2,2,parameters.Ntsteps);
+        for t=1:parameters.Ntsteps
+            hyph_pos(:,:,t)= [GPSandPosition_table.Sensor1_pos_x_m(t),...
+                GPSandPosition_table.Sensor1_pos_y_m(t);...
+                GPSandPosition_table.Sensor2_pos_x_m(t),...
+                GPSandPosition_table.Sensor2_pos_y_m(t)]; %[x1,y1; x2,y2];
+        end
+        BA_params.hyph_pos=hyph_pos;
+        boat_pos(:,1)=GPSandPosition_table.Boat_pos_x_m;
+        boat_pos(:,2)=GPSandPosition_table.Boat_pos_y_m;
+        BA_params.boat_pos=boat_pos;
+        BA_params.boat_start_latlong=[GPSandPosition_table.Boat_Latitude(1),GPSandPosition_table.Boat_Longitude(1)];
+
+end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%///////////////////////////////////////////////////////////////////////
+
 
 %/////////// PARAMETERS for AMBIGUITY SURFACE computation ////////////////
 
@@ -62,8 +138,10 @@ AS_params.sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 
 %----------------  Parameters for modeled TDOA ---------------- 
 % - Grid range and resolution:
-AS_params.xrange=[-300,5000]; % x range in m [min,max]
-AS_params.yrange=[0,7000]; % y range in m (since boat track will be rotated
+minxrange= min(boat_pos(:,1))- 400; %- 400m to include the array behind the boat
+maxxrange= max(boat_pos(:,1)) + 2000; %add 2km in front of the array
+AS_params.xrange=[minxrange,maxxrange]; % x range in m [min,max]
+AS_params.yrange=[0,6000]; % y range in m (since boat track will be rotated
 % around x-axis, and localization is bi-ambigous specify positive y-range).
 % The max should be maximum distance you expect to still localize your signal 
 AS_params.dx=10; % grid step size in m (resolution) in x direction
@@ -101,36 +179,6 @@ AS_params.N= size(AS_params.wpos,1); %number of grid points to evaluate
 %///////////////////////////////////////////////////////////////////////
 
 
-%///////////////////// PARAMETERS for the BOAT and ARRAY /////////////////
-
-% ~~~~~~~~~~~~~~~~~~~~~~~CHANGABLE:~~~~~~~~~~~~~~~~~~~~~~~~
-% Choose either: 
-% get_hyph_pos = 1 to simulate boat movement and hydrophone positions.
-% get_hyph_pos = 2 to use the real data
-
-BA_params.get_hyph_pos = 2; 
-
-if BA_params.get_hyph_pos==1
-    boatspeed_kts = 10; % boat speed in knots
-    %specify line gradient and intersect along which the boat moves:
-    BA_params.mb=-0.5; % line gradient
-    BA_params.b=10; %intersect with y axis
-end
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~COMPUTED:~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-switch BA_params.get_hyph_pos
-    case 1
-        BA_params.boatspeed= boatspeed_kts/1.944; %boat speed in m/s
-        BA_params.timestep = parameters.dt; % how much time elapses in each time step in s 
-        BA_params.d = parameters.d; % distance between the sensors
-    case 2
-%        BA_params.GPSandPosition_table=readtable('GPSandPosition_table.csv'); 
-       BA_params.timestep = parameters.dt; % how much time elapses in each time step in s
-end
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-%///////////////////////////////////////////////////////////////////////
 
 
 

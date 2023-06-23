@@ -1,5 +1,5 @@
 function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected,AS_params, ...
-    BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec)
+    BA_params,timevec)
 % localizetracks.m is a function that localizes user selected TDOA
 % tracks/track segments. It plots them as they are localized and user has
 % the option to either keep localizations or not. User also has an option
@@ -8,24 +8,23 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 % INPUTS:
 % - Tracks_selected = a structure of tracks that satisfy the cutoff
 %           criteria around the beam. It contains the following fields:
-%                   ~ time - a vector of times (starting at 0) for a given
-%                           track
-%                   ~ time_local- a vector of times (datetime format) for a
-%                           given track                          
-%                   ~ tdoa - a vector of tdoas for a given track
+%         ~ time - a vector of times (starting at 0) for a given track                          
+%         ~ time_local- a vector of times (serial date format) for a given track  
+%         ~ tdoa - a vector of tdoas for a given track
 % - AS_params = a structure containing parameters for ambiguity surface 
 %              computation. (see specify_parameters.m for info on fields in
 %              this structure).  
-% - BA_params = a structure containing parameters for the boat and array.
-%           (see specify_parameters.m for info on fields in this structure)  
-% - boat_pos = boat position (in relative coordinates)- M x 2 matrix, 
-%           where M is number of time steps, and each row is [x,y] coordinate 
-%           for that time step
-% - boat_start_latlong: boat start position in latitude and longitude 
+% - BA_params:a structure containing parameters for the boat and array 
+%           (see specify_parameters.m for detailed info on fields in this 
+%           structure) - it includes:
+%       ~ boat_pos : boat position (in relative coordinates)- M x 2 matrix, 
+%         where M is number of time steps, and each row is [x,y] coordinate 
+%         for that time step
+%       ~ boat_start_latlong: boat start position in latitude and longitude 
 %              (decimal degrees), 1 x 2 vector [latitude, longitude];
-% - hyph_pos = sensor positions per time step- a 2 x N x M array, where
-%           N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
-%            coordinates are considered. M = number of time steps.
+%       ~ hyph_pos: two sensor positions per time step- a 2 x N x M array, 
+%           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
+%            coordinates are considered. M = number of time steps. 
 % - timevec = a vector of times that covers the duration of the encounter
 %
 % OUPUTS:
@@ -59,6 +58,8 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 %Pina Gruden February 2023
 
 
+boat_pos=BA_params.boat_pos;
+hyph_pos=BA_params.hyph_pos;
 
 % Pre-allocate
 N=size(Tracks_selected,2);
@@ -78,7 +79,7 @@ k=1;
 while continue_localize ~=0 %to allow multiple groups to be localized consecutevly
 
 [SelectedTracks{k},AStotal{k},ASdilatetotal{k},AStotal_hyperbolas{k},Loc_table_temp,NewGrid{k}] = localize_track(Tracks_selected, ...
-    AS_params,BA_params,boat_pos,boat_start_latlong,hyph_pos,timevec);
+    AS_params,BA_params,timevec);
 
 % /////////////// Plot selected TDOAs and Localizations///////////
 
