@@ -25,8 +25,21 @@ Ntsteps=numel(timevec); %number of time steps
 Nsources=size(Tracks,2);
 tdoa_measured= nan(Nsources,Ntsteps);
 for k=1:Nsources
-    time_indx=ismember(timevec,Tracks(k).time);
+    t_indx_temp1=ismember(timevec,Tracks(k).time);
+    t_indx_temp2=ismember(timevec,Tracks(k).time_local);
+
+    if sum(t_indx_temp1)>0
+        time_indx=t_indx_temp1;
+        t_indx_flag=1;
+    elseif sum(t_indx_temp2)>0
+        time_indx=t_indx_temp2;
+        t_indx_flag=2;
+    else
+        error(['Your time vector (timevec) does not match any of ' ...
+            'the time stamps in your tdoa track. Check for errors and try again.'])
+    end
     tdoa_measured(k,time_indx)= Tracks(k).tdoa;
+
 end
 
 %-------- Select which tracks you want to compute the surfaces for------
@@ -39,8 +52,12 @@ prompt = "Which track/tracks you want to localize? \n" + ...
 SelectedTracks =input(prompt);
 selected_indx=zeros(length(SelectedTracks),Ntsteps);
 for n=1:length(SelectedTracks)
-ind=find(abs(Tracks(SelectedTracks(n)).tdoa)<maxtdoa);
-selected_indx(n,:)=ismember(timevec,Tracks(SelectedTracks(n)).time(ind));
+    ind=find(abs(Tracks(SelectedTracks(n)).tdoa)<maxtdoa);
+    if t_indx_flag==1
+        selected_indx(n,:)=ismember(timevec,Tracks(SelectedTracks(n)).time(ind));
+    elseif t_indx_flag==2
+        selected_indx(n,:)=ismember(timevec,Tracks(SelectedTracks(n)).time_local(ind));
+    end
 end
 selected_indx=sum(selected_indx,1);
 tdoa_select=sum(tdoa_measured(SelectedTracks,:),1,'omitnan');
