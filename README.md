@@ -97,7 +97,7 @@ Then run the package by running:
 
 ## 4. Output
 
-1. Otuput of simulated script are localization estimates and plots of the results.
+1. Output of Simulated scenarios are localization estimates and plots of the results.
 
 2. Output of Real data processing is a table containing localization estimates (in Cartesian coordinates and latitude/longitude formats) and the perpendicular distances to the array for each selected TDOA track (or fragments of the same TDOA track), and plots of the results. The variables that are saved are:
 
