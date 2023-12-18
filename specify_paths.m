@@ -13,22 +13,22 @@ s=what('./Test_example/Data/TDOA_tracks/');
 folder.tdoas = [s.path,'/'];
 
 %2) Path to Cross-correlogram information (TDOA_tracking_masters package):
-% If not avaiable specify folder.crosscorr = [];
+% If not available specify folder.crosscorr = [];
 s=what('./Test_example/Data/Crosscorrelograms/');
 folder.crosscorr = [s.path,'/'];
 
 %3) Path to Results of Extracted Pamguard detections (Extract_Pamguard_detections package):
-% If they are not avaiable specify folder.pagmuard = [];
+% If they are not available specify folder.pagmuard = [];
 s=what('./Test_example/Data/Pamguard_detections/'); 
 folder.pamguard = [s.path,'/'];
 
 % 4) Path to all raw GPS and Array data
-% If GPS data not avaiable specify folder.rawgps = [];
+% If GPS data not available specify folder.rawgps = [];
 s=what('./Test_example/Data/Raw_GPSandArray_info/'); 
 folder.rawgps = [s.path,'/'];
 
 % 5) Path to GPS and Sensor Position table will be stored:
-% If GPS data not avaiable specify folder.gps = [];
+% If GPS data not available specify folder.gps = [];
 s=what('./Test_example/Data/GPSandPos_info/'); 
 folder.gps = [s.path,'/'];
 
