@@ -1,6 +1,6 @@
 # Project specific files and folders #
 ######################
-
+/Test_example/
 specify_paths.m
 specify_parameters.m
 
