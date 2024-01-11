@@ -75,13 +75,18 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 
 %///////////////////// PARAMETERS for the BOAT and ARRAY /////////////////
 
-% ~~~~~~~~~~~~~~~~~~~~~~~CHANGABLE:~~~~~~~~~~~~~~~~~~~~~~~~
-% Choose either: 
-% get_hyph_pos = 1 to simulate boat movement and hydrophone positions.
-% get_hyph_pos = 2 to use the real data
-
+% Determine wether you had real GPS data available or not (this is
+% encapsulated in the parameter parameters.get_hyph_pos (obtained in script A0_SetUp.m)
+% and is based on wether you had any data in the folder or not).
+%  parameters.get_hyph_pos will be either 1 or 2- i.e.
+% ~ parameters.get_hyph_pos = 1 will simulate boat movement and hydrophone positions.
+% ~ parameters.get_hyph_pos = 2 will use the real data
 BA_params.get_hyph_pos = parameters.get_hyph_pos; 
 
+% ~~~~~~~~~~~~~~~~~~~~~~~CHANGABLE:~~~~~~~~~~~~~~~~~~~~~~~~
+
+%ONLY CHANGE BELOW IF YOU ARE SIMULATING GPS POSITIONS - and ONLY CHANGE
+%the parameters **INSIDE** the IF STATMENT:
 if BA_params.get_hyph_pos==1
     boatspeed_kts = 10; % boat speed in knots
     %specify line gradient and intersect along which the boat moves:
@@ -156,7 +161,7 @@ AS_params.mean_horiz_swimspeed= 0.5; %mean horizontal swim speed [m/s]
 %------------ Specify cutoff criteria for tracks around the beam ---------
 % Specify what is the first degrees to be considered around the beam - this
 % will affect which tracks you consider for localization
-AS_params.bearing_cuttof = 60;
+AS_params.bearing_cuttof = 20; %defualt was 60
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
