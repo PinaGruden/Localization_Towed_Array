@@ -26,12 +26,12 @@ function [AStotal,ASdilatetotal,AStotal_hyperbolas] = computeAS(tdoa_measured_se
 % Pina Gruden, Dec 2022, UH Manoa
 
 
-wpos=AS_params.wpos;
-Ngp_x=AS_params.Ngp_x;
-Ngp_y=AS_params.Ngp_y;
-dx=AS_params.dx;
-dy=AS_params.dy;
-sig=AS_params.sig;
+% wpos=AS_params.wpos;
+% Ngp_x=AS_params.Ngp_x;
+% Ngp_y=AS_params.Ngp_y;
+% dx=AS_params.dx;
+% dy=AS_params.dy;
+% sig=AS_params.sig;
 sig_hyperbolas=AS_params.sig_hyperbolas;
 c= AS_params.c;
 mean_horiz_swimspeed = AS_params.mean_horiz_swimspeed;
@@ -126,27 +126,34 @@ yrange_new;
 % ----------------Non-dilated surfaces-------------------
 % Marginalize along x-axis
 %x_marg= max(AStotal,[],1);
-x_marg= sum(AStotal,1);
-[~,locs_x]=findpeaks(x_marg,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
+x_marg= sum(AStotal_rough,1);
+[~,locs_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
 
 % Marginalize along y-axis
 % y_marg=max(AStotal,[],2);%
-y_marg=sum(AStotal,2);
-[pks_y,locs_y]=findpeaks(y_marg,AS_params.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
+y_marg=sum(AStotal_rough,2);
+[py,locs_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
+% I get a curve with this- take maybe 50% or something to be my bounds
 
-estim_location_m_rotd = [locs_x(:),locs_y(:)];
+%this below not qquite right- if I search ind_ymarg=find(y_marg>py*0.7)
+%then I get values but they are not 70% of the Y coordinate values.
+ind_ymarg=find(y_marg>locs_y*0.7);
+d_m_low=gridparams.Y(ind_ymarg(1),1);
+d_m_high=gridparamsAS_params.Y(ind_ymarg(end),1);
+
+
 
 
 %------------------ Dilated surfaces----------------------
 % Marginalize along x-axis
-x_marg_dilate= sum(ASdilatetotal,1);
-[~,locs_x]=findpeaks(x_marg_dilate,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+x_marg_dilate= sum(ASdilatetotal_rough,1);
+[~,locs_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
 
 % Marginalize along y-axis
-y_marg_dilate=sum(ASdilatetotal,2);
-[pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,AS_params.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
+y_marg_dilate=sum(ASdilatetotal_rough,2);
+[~,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
 
-estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
+
 
 %----------------------------------------------------------------
 %----------------------------------------------------------------
@@ -162,7 +169,7 @@ xrange=xrange_new;
 yrange=yrange_new;
 [gridparams,wpos2D] = make_2Dgrids(xrange,yrange,dx,dy);
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2.b) Pre-allocate ~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3.b) Pre-allocate ~~~~~~~~~~~~~~~~~~~~~~~~~~
 AS_select= nan(gridparams.Ngp_y,gridparams.Ngp_x,Ntsteps);%swap x and y inpuput arguments since 
 % reshape() will be used to fill in the values
 AS_Hyperbolas = AS_select;
@@ -170,7 +177,6 @@ ASdilate = AS_select;
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2.c) Compute AS ~~~~~~~~~~~~~~~~~~~~~~~~~~
-%count=1; plotf=0;
 for t=1:Ntsteps % for each time step compute LS
     if selected_indx(t)
         rp=hyph_pos(:,:,t);
