@@ -1,4 +1,4 @@
-function [AStotal,ASdilatetotal,AStotal_hyperbolas] = computeAS(tdoa_measured_select,selected_indx,hyph_pos,AS_params,BA_params)
+function [AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams] = computeAS(tdoa_measured_select,selected_indx,hyph_pos,AS_params,BA_params)
 %computeAS.m computes an ambiguity surface (AS) for a given source based on 
 %the measured and modeled time difference of arrivals (TDOAs)
 %
@@ -115,45 +115,59 @@ AStotal_rough=prod(AS_select_rough,3,'omitnan');
 ASdilatetotal_rough=prod(ASdilate_rough,3,'omitnan');
 
 %~~~~~~~2.d) Determine the peak (Loc) in AS to get narrower x/yrange~~~~~~~
-%Compute it for both normal AS and dilated and take whathever is bigger
-xrange_new;
-yrange_new;
+%Compute it for both normal AS and dilated and take whathever is smaller&bigger
 
 %----------------------------------------------------------------
 %----------------------------------------------------------------
-%PUT CODE HERE!! modify stuff below:
 % Select tallest peak as localization (since it's biambigous)
 % ----------------Non-dilated surfaces-------------------
 % Marginalize along x-axis
-%x_marg= max(AStotal,[],1);
 x_marg= sum(AStotal_rough,1);
-[~,locs_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
+[height_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
 
 % Marginalize along y-axis
-% y_marg=max(AStotal,[],2);%
 y_marg=sum(AStotal_rough,2);
-[py,locs_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
-% I get a curve with this- take maybe 50% or something to be my bounds
+[height_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
 
-%this below not qquite right- if I search ind_ymarg=find(y_marg>py*0.7)
-%then I get values but they are not 70% of the Y coordinate values.
-ind_ymarg=find(y_marg>locs_y*0.7);
-d_m_low=gridparams.Y(ind_ymarg(1),1);
-d_m_high=gridparamsAS_params.Y(ind_ymarg(end),1);
+% If there are insufficient bearing changess to have
+% a peak in the surface- it will not have a peak so just take the max:
+if isempty(height_y) 
+    height_y=max(y_marg);
+end
 
+% Take 50% from the peak to be my bounds
+ind_xmarg=find(x_marg>height_x*0.5);
+ind_ymarg=find(y_marg>height_y*0.5);
 
-
+xrange_new_temp1=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
+yrange_new_temp1=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
 
 %------------------ Dilated surfaces----------------------
 % Marginalize along x-axis
 x_marg_dilate= sum(ASdilatetotal_rough,1);
-[~,locs_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+[height_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
 
 % Marginalize along y-axis
 y_marg_dilate=sum(ASdilatetotal_rough,2);
-[~,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
+[height_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
+
+% If there are insufficient bearing changess to have
+% a peak in the surface- it will not have a peak so just take the max:
+if isempty(height_y) 
+    height_y=max(y_marg);
+end
 
 
+% Take 50% from the peak to be my bounds
+ind_xmarg=find(x_marg_dilate>height_x*0.5);
+ind_ymarg=find(y_marg_dilate>height_y*0.5);
+
+xrange_new_temp2=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
+yrange_new_temp2=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
+
+%-------------- Get the new range --------------------
+xrange_new=[min(xrange_new_temp1(1),xrange_new_temp2(1)),max(xrange_new_temp1(2),xrange_new_temp2(2))];
+yrange_new=[min(yrange_new_temp1(1),yrange_new_temp2(1)),max(yrange_new_temp1(2),yrange_new_temp2(2))];
 
 %----------------------------------------------------------------
 %----------------------------------------------------------------
@@ -231,6 +245,8 @@ ASdilatetotal=prod(ASdilate,3,'omitnan');
 % Get intersecting hyperbolas:
 AStotal_hyperbolas = sum(AS_Hyperbolas,3,'omitnan');
 
+%add total grid- wpos2D to the gridparams:
+gridparams.wpos = wpos2D;
 
 
 end
