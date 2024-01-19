@@ -93,7 +93,7 @@ hyph_pos_rotd= pagetranspose(pagemtimes(rotmatfnc(-phi),pagetranspose(hyph_pos_s
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 3) Compute Ambiguity Surface ///////////////////
 tic
-[AStotal,ASdilatetotal,AStotal_hyperbolas]= computeAS(tdoa_measured_select, ...
+[AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams]= computeAS(tdoa_measured_select, ...
     selected_indx,hyph_pos_rotd,AS_params,BA_params);
 toc
 %//////////////////////////////////////////////////////////////////////////
@@ -104,12 +104,12 @@ toc
 % Marginalize along x-axis
 %x_marg= max(AStotal,[],1);
 x_marg= sum(AStotal,1);
-[~,locs_x]=findpeaks(x_marg,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
+[~,locs_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
 
 % Marginalize along y-axis
 % y_marg=max(AStotal,[],2);%
 y_marg=sum(AStotal,2);
-[pks_y,locs_y]=findpeaks(y_marg,AS_params.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
+[pks_y,locs_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
 
 estim_location_m_rotd = [locs_x(:),locs_y(:)];
 
@@ -117,11 +117,11 @@ estim_location_m_rotd = [locs_x(:),locs_y(:)];
 %------------------ Dilated surfaces----------------------
 % Marginalize along x-axis
 x_marg_dilate= sum(ASdilatetotal,1);
-[~,locs_x]=findpeaks(x_marg_dilate,AS_params.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+[~,locs_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
 
 % Marginalize along y-axis
 y_marg_dilate=sum(ASdilatetotal,2);
-[pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,AS_params.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
+[pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
 
 estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
 
@@ -149,8 +149,8 @@ d_m=estim_location_m_rotd(2); % distance is equal to y-coordinate (since boat tr
 % compute error on the estimated distance (90% from the estimated
 % distance)
 ind_ymarg=find(y_marg>pks_y*0.9);
-d_m_low=AS_params.Y(ind_ymarg(1),1);
-d_m_high=AS_params.Y(ind_ymarg(end),1);
+d_m_low=gridparams.Y(ind_ymarg(1),1);
+d_m_high=gridparams.Y(ind_ymarg(end),1);
 
 %------------------ Dilated surfaces----------------------
 d_m_dilated=estim_location_m_dilated_rotd(2);
@@ -158,8 +158,8 @@ d_m_dilated=estim_location_m_dilated_rotd(2);
 % compute error on the estimated distance (90% from the estimated
 % distance)
 ind_ymarg=find(y_marg_dilate>pks_y_dilate*0.9);
-d_m_dilated_low=AS_params.Y(ind_ymarg(1),1);
-d_m_dilated_high=AS_params.Y(ind_ymarg(end),1);
+d_m_dilated_low=gridparams.Y(ind_ymarg(1),1);
+d_m_dilated_high=gridparams.Y(ind_ymarg(end),1);
 
 %-----------------------------------------------------------------
 % The result can be checked by running the following (also if you dont
@@ -222,9 +222,9 @@ estim_location_latlong = M2LatLon(estim_location_m,[boat_start_latlong(1),boat_s
 estim_location_latlong_dilated = M2LatLon(estim_location_m_dilated,[boat_start_latlong(1),boat_start_latlong(2)]);
 
 %--------------- Get new gridpoints of non-rotated grid:------------------
-new_xy= (rotmatfnc(phi)*[AS_params.wpos]')';
-X_new=reshape(new_xy(:,1),size(AS_params.X));
-Y_new=reshape(new_xy(:,2),size(AS_params.Y));
+new_xy= (rotmatfnc(phi)*[gridparams.wpos]')';
+X_new=reshape(new_xy(:,1),size(gridparams.X));
+Y_new=reshape(new_xy(:,2),size(gridparams.Y));
 NewGrid.X=X_new;
 NewGrid.Y=Y_new;
 
