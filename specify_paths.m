@@ -27,8 +27,7 @@ s=what(myfolder);
 folder.tdoas = [s.path,'/'];
 
 %2) Path to Cross-correlogram information (TDOA_tracking_masters package):
-% If not available specify folder.crosscorr = [];
-myfolder = '/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Data/Crosscorrelograms/';
+myfolder = './Test_example/Data/Crosscorrelograms/';
 if not(isfolder(myfolder)) % If the folder doesnt exist
     mkdir(myfolder) %make a folder    
     disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
@@ -37,34 +36,46 @@ s=what(myfolder);
 folder.crosscorr = [s.path,'/'];
 
 %3) Path to Results of Extracted Pamguard detections (Extract_Pamguard_detections package):
-% If they are not available specify folder.pagmuard = [];
-myfolder='/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Data/Pamguard_detections/'; 
-if not(isfolder(myfolder)) % If the folder doesnt exist
-    mkdir(myfolder) %make a folder    
-    disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+% If they are not available specify: myfolder = [];
+myfolder='./Test_example/Data/Pamguard_detections/';
+if ~isempty(myfolder)
+    if not(isfolder(myfolder)) % If the folder doesnt exist
+        mkdir(myfolder) %make a folder
+        disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+    end
+    s=what(myfolder);
+    folder.pamguard = [s.path,'/'];
+else
+    folder.pamguard = [];
 end
-s=what(myfolder); 
-folder.pamguard = [s.path,'/'];
 
 % 4) Path to all raw GPS and Array data
-% If GPS data not available specify folder.rawgps = [];
-myfolder='/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Data/Raw_GPSandArray_info/'; 
-if not(isfolder(myfolder)) % If the folder doesnt exist
-    mkdir(myfolder) %make a folder  
-    disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+% If GPS data not available specify: myfolder = [];
+myfolder='./Test_example/Data/Raw_GPSandArray_info/';
+if ~isempty(myfolder)
+    if not(isfolder(myfolder)) % If the folder doesnt exist
+        mkdir(myfolder) %make a folder
+        disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+    end
+    s=what(myfolder);
+    folder.rawgps = [s.path,'/'];
+else
+    folder.rawgps = [];
 end
-s=what(myfolder); 
-folder.rawgps = [s.path,'/'];
 
 % 5) Path to GPS and Sensor Position table will be stored:
-% If GPS data not available specify folder.gps = [];
-myfolder='/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Data/GPSandPos_info/'; 
-if not(isfolder(myfolder)) % If the folder doesnt exist
-    mkdir(myfolder) %make a folder  
-    disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+% If GPS data not available specify: myfolder = [];
+myfolder='./Test_example/Data/GPSandPos_info/';
+if ~isempty(myfolder)
+    if not(isfolder(myfolder)) % If the folder doesnt exist
+        mkdir(myfolder) %make a folder
+        disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
+    end
+    s=what(myfolder);
+    folder.gps = [s.path,'/'];
+else
+    folder.gps = [];
 end
-s=what(myfolder); 
-folder.gps = [s.path,'/'];
 
 % 6) Path to where Localization Results will be stored:
 myfolder='/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Results/';
