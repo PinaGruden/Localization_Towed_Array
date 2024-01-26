@@ -27,7 +27,7 @@ s=what(myfolder);
 folder.tdoas = [s.path,'/'];
 
 %2) Path to Cross-correlogram information (TDOA_tracking_masters package):
-myfolder = './Test_example/Data/Test/';
+myfolder = './Test_example/Data/Crosscorrelograms/';
 if not(isfolder(myfolder)) % If the folder doesnt exist
     mkdir(myfolder) %make a folder    
     disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
