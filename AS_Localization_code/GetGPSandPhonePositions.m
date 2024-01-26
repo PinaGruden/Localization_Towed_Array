@@ -72,7 +72,7 @@ tmax = max([Tracks.time_local]);
 %% Get GPS positions of the BOAT:
 % 1) Get indices of times that match tmin&tmax from the overall GPS table:
 irow = find(datenum(gps_data.UTC(:))>tmin & datenum(gps_data.UTC(:))<tmax);
-gps_data_select = gps_data([irow(1)-1;irow;irow(end)+1],:); %add one more data point at the beginning and end to make sure you cover all possible times
+gps_data_select = gps_data([irow(1)-3;irow;irow(end)+3],:); %add more 30 s of data (each point is 10 s of data) at the beginning and end to make sure you cover all possible times
 
 % 2) Interpolate Positions to match time steps used in TDOA tracks:
 interp_long= interp1(datenum(gps_data_select.UTC),gps_data_select.Longitude,t_serialdate);
@@ -83,6 +83,11 @@ start_pos = [interp_lat(1),interp_long(1)]; % start position of the boat
 wgs84 = wgs84Ellipsoid;
 [x,y,~] = geodetic2enu(interp_lat(:),interp_long(:),0,start_pos(1),start_pos(2),0,wgs84); %Unit is 'meter'
 % geodetic2enu - Transform geodetic coordinates to local east-north-up
+
+%check for nan values and remove before fitting a polynomial:
+indnan = isnan(x) | isnan(y);
+x(indnan) = [];
+y(indnan) = [];
 
 % 4) Smooth the boat positions:
 p = polyfit(x, y, 1);
