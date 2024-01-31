@@ -124,6 +124,8 @@ ASdilatetotal_rough=prod(ASdilate_rough,3,'omitnan');
 % Marginalize along x-axis
 x_marg= sum(AStotal_rough,1);
 [height_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
+% Take 50% from the peak to be my bounds
+ind_xmarg=find(x_marg>height_x*0.5);
 
 % Marginalize along y-axis
 y_marg=sum(AStotal_rough,2);
@@ -131,13 +133,14 @@ y_marg=sum(AStotal_rough,2);
 
 % If there are insufficient bearing changess to have
 % a peak in the surface- it will not have a peak so just take the max:
-if isempty(height_y) 
+if isempty(height_y)
     height_y=max(y_marg);
+    % Take 80% from the peak to be my bounds
+    ind_ymarg=find(y_marg>height_y*0.2);
+else % there is a defined peak in y marginalized surface
+    % Take 50% from the peak to be my bounds
+    ind_ymarg=find(y_marg>height_y*0.5);
 end
-
-% Take 50% from the peak to be my bounds
-ind_xmarg=find(x_marg>height_x*0.5);
-ind_ymarg=find(y_marg>height_y*0.5);
 
 xrange_new_temp1=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
 yrange_new_temp1=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
@@ -146,6 +149,8 @@ yrange_new_temp1=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]
 % Marginalize along x-axis
 x_marg_dilate= sum(ASdilatetotal_rough,1);
 [height_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+% Take 50% from the peak to be my bounds
+ind_xmarg=find(x_marg_dilate>height_x*0.5);
 
 % Marginalize along y-axis
 y_marg_dilate=sum(ASdilatetotal_rough,2);
@@ -153,14 +158,14 @@ y_marg_dilate=sum(ASdilatetotal_rough,2);
 
 % If there are insufficient bearing changess to have
 % a peak in the surface- it will not have a peak so just take the max:
-if isempty(height_y) 
-    height_y=max(y_marg);
+if isempty(height_y)
+    height_y=max(y_marg_dilate);
+    % Take 80% from the peak to be my bounds
+    ind_ymarg=find(y_marg_dilate>height_y*0.2);
+else % there is a defined peak in y marginalized surface
+    % Take 50% from the peak to be my bounds
+    ind_ymarg=find(y_marg_dilate>height_y*0.5);
 end
-
-
-% Take 50% from the peak to be my bounds
-ind_xmarg=find(x_marg_dilate>height_x*0.5);
-ind_ymarg=find(y_marg_dilate>height_y*0.5);
 
 xrange_new_temp2=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
 yrange_new_temp2=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
