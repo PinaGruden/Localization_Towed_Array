@@ -18,7 +18,7 @@ function [folder, folder2save2] = specify_paths
 
 
 %1) Path to Results of Extracted TDOA tracks (TDOA_tracking_masters package):
-myfolder = '/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Data/TDOA_tracks/';
+myfolder = './Test_example/Data/TDOA_tracks/';
 if not(isfolder(myfolder)) % If the folder doesnt exist - throw error since you need data to localize.
 error(['The folder ', myfolder, ' does not exists. There is no data ' ...
     'for localization! Run "TDOA_tracking_master" package first!'])
@@ -78,7 +78,7 @@ else
 end
 
 % 6) Path to where Localization Results will be stored:
-myfolder='/Users/pinagruden/Dropbox/Pina/HAWAII/MATLAB/Troubleshooting_Tracking_and_Localization_Packages/Issue_33/3_Localize/Results/';
+myfolder='./Test_example/Results/';
 if not(isfolder(myfolder)) % If the folder doesnt exist
     mkdir(myfolder) %make a folder    
     disp(['WARNING: The specified folder ', myfolder, ' does not exists. Created a new folder.'])
