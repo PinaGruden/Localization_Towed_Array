@@ -111,10 +111,22 @@ clear indx
 
 % Plot against cross-correlograms and against Pamguard detections (if
 % available)
-
-plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
-    AS_params.tdoa_cutoff,Rxy_envelope_both,All_data_c,All_data_w)
-
+if ~isempty(folder.pamguard) % If Pamguard detections are available
+    switch parameters.signal_type
+        case 'both'
+            plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
+                AS_params.tdoa_cutoff,Rxy_envelope_both,All_data_c,All_data_w)
+        case 'whistles'
+            plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
+                AS_params.tdoa_cutoff,Rxy_envelope_both,All_data_w)
+        case 'clicks'
+            plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
+                AS_params.tdoa_cutoff,Rxy_envelope_both,All_data_c)
+    end
+else % If Pamguard detections are not available
+    plot_tracks(folder,Tracks,Tracks_selected,t_serialdate,lags,parameters, ...
+        AS_params.tdoa_cutoff,Rxy_envelope_both)
+end
 
 
 
