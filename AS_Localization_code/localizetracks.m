@@ -96,21 +96,21 @@ end
 fig=figure;
 subplot(131)
 % Final surface with intersecting hyperbolas
-plot_AS(AStotal_hyperbolas{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m);
+plot_AS(AStotal_hyperbolas(k),NewGrid(k),hyph_pos,boat_pos,Loc_table_temp.Loc_m);
 title (['Intersecting hyperbolas for source ', num2str(Loc_table_temp.TrackID{:})])
 
 subplot(132)
 % Final ambiguity surface
 est_loc_bounds=cell(1,2);
 est_loc_bounds{1}=Loc_table_temp.Loc_m_min;est_loc_bounds{2}=Loc_table_temp.Loc_m_max;
-plot_AS(AStotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m,est_loc_bounds);
+plot_AS(AStotal(k),NewGrid(k),hyph_pos,boat_pos,Loc_table_temp.Loc_m,est_loc_bounds);
 title (['Total ambiguity surface for source ', num2str(Loc_table_temp.TrackID{:})])
 
 subplot(133)
 % Final ambiguity surface with dilation
 est_loc_bounds=cell(1,2);
 est_loc_bounds{1}=Loc_table_temp.Loc_m_dilated_min;est_loc_bounds{2}=Loc_table_temp.Loc_m_dilated_max;
-plot_AS(ASdilatetotal{k},NewGrid{k},hyph_pos,boat_pos,Loc_table_temp.Loc_m_dilated,est_loc_bounds);  
+plot_AS(ASdilatetotal(k),NewGrid(k),hyph_pos,boat_pos,Loc_table_temp.Loc_m_dilated,est_loc_bounds);  
 title(['Total ambiguity surface WITH dilation for source ', num2str(Loc_table_temp.TrackID{:})])
 
 %Make the figure big
