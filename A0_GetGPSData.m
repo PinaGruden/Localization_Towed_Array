@@ -27,17 +27,17 @@ if ~isempty(folder.rawgps)
     fname(~cellfun('isclass', fname, 'char')) = {''};  % Care for non-strings
     
     % Load table containing GPS data
-    matchC = reshape(strfind(fname, 'gps'), size(files));
+    matchC = reshape(strfind(lower(fname), 'gps'), size(files));
     match  = ~cellfun('isempty', matchC);
     gps_data=readtable([files(match).folder,'/',files(match).name]);
 
     % Load table containing Depth data
-    matchC = reshape(strfind(fname, 'Depth'), size(files));
+    matchC = reshape(strfind(lower(fname), 'depth'), size(files));
     match  = ~cellfun('isempty', matchC);
     depth_data=readtable([files(match).folder,'/',files(match).name]);
 
     % Load table containing Array data:
-    matchC = reshape(strfind(fname, 'Array'), size(files));
+    matchC = reshape(strfind(lower(fname), 'array'), size(files));
     match  = ~cellfun('isempty', matchC);
     array_data=readtable([files(match).folder,'/',files(match).name]);
 
