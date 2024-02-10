@@ -1,4 +1,4 @@
-function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,tdoa_cutoff,data_corsscorr,data_pamguard_c,data_pamguard_w)
+function plot_tracks(folder,Tracks,Tracks_selected, t_serialdate, lags,parameters,tdoa_cutoff,data_corsscorr,varargin)
 % plot_tracks.m is a function that plots all and selected TDOA tracks 
 % against Pamguard detections (if available) or against cross-correlograms
 %
@@ -65,7 +65,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
             title(['Cross-correlogram with tracked and selected TDOAs from measurements based on ', parameters.signal_type])
-            caxis([0,10])
+            clim([0,10])
             im.AlphaData = 0.5; % change this value to change the background image transparency
             hold all;
             %plot second data
@@ -75,7 +75,7 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             colormap(flipud(gray(256)))
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
-            caxis([0,10])
+            clim([0,10])
             im1.AlphaData = 0.5; % change this value to change the foreground image transparency
             %link axes
             linkaxes([ax1,ax2])
@@ -126,10 +126,10 @@ if ~isempty(folder.crosscorr) % plot against cross-correlograms
             % PLOT TRACKED TDOAS
             figure;
             %plot cross-correlogram
-            imagesc(t_serialdate,lags,data_corsscorr),
+            imagesc(t_serialdate,lags,data_corsscorr{:}),
             datetick('x','keeplimits');
             colormap(flipud(gray(256)))
-            caxis([0,10])
+            clim([0,10])
             colorbar
             ylim([-parameters.d/parameters.c,parameters.d/parameters.c])
             xlabel('Local Time (HH:MM:SS)'), ylabel('TDOA (s)'),
@@ -176,14 +176,14 @@ end
 
 
 if ~isempty(folder.pamguard) % Plot against Pamguard detections
-    All_data_c = data_pamguard_c;
-    All_data_w =data_pamguard_w;
-
     figure,hold on;
+
     % Plot Pamguard detections:
-    plot(datenum(All_data_w.time_UTC),-1.*All_data_w.tdoa,'o', ...
-        'Color',g_col, 'MarkerFaceColor', g_col, 'MarkerSize', 3)
-    plot(datenum(All_data_c.time_UTC),-1.*All_data_c.tdoa,'.','Color',g_col)
+    for k=1:size(varargin,2)
+        plot(datenum(varargin{1,k}.time_UTC),-1.*varargin{1,k}.tdoa,'o', ...
+            'Color',g_col, 'MarkerFaceColor', g_col, 'MarkerSize', 3)
+    end
+    
     % Plot All TDOA tracks
     for k=1:size(Tracks,2)
         plot(Tracks(k).time_local, Tracks(k).tdoa,'-','Color',b_col,'LineWidth',5)
