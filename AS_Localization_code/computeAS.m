@@ -127,6 +127,14 @@ x_marg= sum(AStotal_rough,1);
 % Take 50% from the peak to be my bounds
 ind_xmarg=find(x_marg>height_x*0.5);
 
+% If peak is extremely narrow then sometimes not both sides from the peak
+% are included- ensure there are at least 3 values in there with the peak
+% value in the middle:
+if numel(ind_xmarg)<3
+    ind_xpeak=find(x_marg==height_x);
+    ind_xmarg = [ind_xpeak-1,ind_xpeak,ind_xpeak+1];
+end
+
 % Marginalize along y-axis
 y_marg=sum(AStotal_rough,2);
 [height_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
@@ -142,8 +150,16 @@ else % there is a defined peak in y marginalized surface
     ind_ymarg=find(y_marg>height_y*0.5);
 end
 
-xrange_new_temp1=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
-yrange_new_temp1=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
+% If peak is extremely narrow then sometimes not both sides from the peak
+% are included- ensure there are at least 3 values in there with the peak
+% value in the middle (although very unlikely in the y-direction)
+if numel(ind_ymarg)<3
+    ind_ypeak=find(y_marg==height_y);
+    ind_ymarg = [ind_ypeak-1,ind_ypeak,ind_ypeak+1];
+end
+
+xrange_new_temp1=round([gridparams.x(ind_xmarg(1))-gridparams.dx,gridparams.x(ind_xmarg(end))+gridparams.dx]);
+yrange_new_temp1=round([gridparams.y(ind_ymarg(1))-gridparams.dy,gridparams.y(ind_ymarg(end))+gridparams.dy]);
 
 %------------------ Dilated surfaces----------------------
 % Marginalize along x-axis
@@ -151,6 +167,14 @@ x_marg_dilate= sum(ASdilatetotal_rough,1);
 [height_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
 % Take 50% from the peak to be my bounds
 ind_xmarg=find(x_marg_dilate>height_x*0.5);
+
+% If peak is extremely narrow then sometimes not both sides from the peak
+% are included- ensure there are at least 3 values in there with the peak
+% value in the middle:
+if numel(ind_xmarg)<3
+    ind_xpeak=find(x_marg_dilate==height_x);
+    ind_xmarg = [ind_xpeak-1,ind_xpeak,ind_xpeak+1];
+end
 
 % Marginalize along y-axis
 y_marg_dilate=sum(ASdilatetotal_rough,2);
@@ -167,8 +191,16 @@ else % there is a defined peak in y marginalized surface
     ind_ymarg=find(y_marg_dilate>height_y*0.5);
 end
 
-xrange_new_temp2=round([gridparams.x(ind_xmarg(1)),gridparams.x(ind_xmarg(end))]);
-yrange_new_temp2=round([gridparams.y(ind_ymarg(1)),gridparams.y(ind_ymarg(end))]);
+% If peak is extremely narrow then sometimes not both sides from the peak
+% are included- ensure there are at least 3 values in there with the peak
+% value in the middle (although very unlikely in the y-direction)
+if numel(ind_ymarg)<3
+    ind_ypeak=find(y_marg_dilate==height_y);
+    ind_ymarg = [ind_ypeak-1,ind_ypeak,ind_ypeak+1];
+end
+
+xrange_new_temp2=round([gridparams.x(ind_xmarg(1))-gridparams.dx,gridparams.x(ind_xmarg(end))+gridparams.dx]);
+yrange_new_temp2=round([gridparams.y(ind_ymarg(1))-gridparams.dy,gridparams.y(ind_ymarg(end))+gridparams.dy]);
 
 %-------------- Get the new range --------------------
 xrange_new=[min(xrange_new_temp1(1),xrange_new_temp2(1)),max(xrange_new_temp1(2),xrange_new_temp2(2))];
