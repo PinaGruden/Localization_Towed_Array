@@ -1,4 +1,4 @@
-function [AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams] = computeAS(tdoa_measured_select,selected_indx,hyph_pos,AS_params,BA_params)
+function [AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams,flag_locnotpossible] = computeAS(tdoa_measured_select,selected_indx,hyph_pos,AS_params,BA_params)
 %computeAS.m computes an ambiguity surface (AS) for a given source based on 
 %the measured and modeled time difference of arrivals (TDOAs)
 %
@@ -50,118 +50,53 @@ yrange=AS_params.yrange;
     AS_params,BA_params,gridparams,wpos2D,tdoa_measured_select,sig,tstep90);
 
 
-%~~~~~~~2.d) Determine the peak (Loc) in AS to get narrower x/yrange~~~~~~~
+%~~~~~~~2.c) Determine the peak (Loc) in AS to get narrower x/yrange~~~~~~~
 %Compute it for both normal AS and dilated and take whathever is smaller&bigger
 
 %----------------------------------------------------------------
-%----------------------------------------------------------------
-% Select tallest peak as localization (since it's biambigous)
 % ----------------Non-dilated surfaces-------------------
-% Marginalize along x-axis
-x_marg= sum(AStotal_rough,1);
-[height_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
-% Take 50% from the peak to be my bounds
-ind_xmarg=find(x_marg>height_x*0.5);
-
-% If peak is extremely narrow then sometimes not both sides from the peak
-% are included- ensure there are at least 3 values in there with the peak
-% value in the middle:
-if numel(ind_xmarg)<3
-    ind_xpeak=find(x_marg==height_x);
-    ind_xmarg = [ind_xpeak-1,ind_xpeak,ind_xpeak+1];
-end
-
-% Marginalize along y-axis
-y_marg=sum(AStotal_rough,2);
-[height_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
-
-% If there are insufficient bearing changess to have
-% a peak in the surface- it will not have a peak so just take the max:
-if isempty(height_y)
-    height_y=max(y_marg);
-    % Take 80% from the peak to be my bounds
-    ind_ymarg=find(y_marg>height_y*0.2);
-else % there is a defined peak in y marginalized surface
-    % Take 50% from the peak to be my bounds
-    ind_ymarg=find(y_marg>height_y*0.5);
-end
-
-% If peak is extremely narrow then sometimes not both sides from the peak
-% are included- ensure there are at least 3 values in there with the peak
-% value in the middle (although very unlikely in the y-direction)
-if numel(ind_ymarg)<3
-    ind_ypeak=find(y_marg==height_y);
-    ind_ymarg = [ind_ypeak-1,ind_ypeak,ind_ypeak+1];
-end
-
-xrange_new_temp1=round([gridparams.x(ind_xmarg(1))-gridparams.dx,gridparams.x(ind_xmarg(end))+gridparams.dx]);
-yrange_new_temp1=round([gridparams.y(ind_ymarg(1))-gridparams.dy,gridparams.y(ind_ymarg(end))+gridparams.dy]);
+[xrange_new_temp1,yrange_new_temp1,flag_locnotpossible1] = get_xyrange(AStotal_rough,gridparams);
 
 %------------------ Dilated surfaces----------------------
-% Marginalize along x-axis
-x_marg_dilate= sum(ASdilatetotal_rough,1);
-[height_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
-% Take 50% from the peak to be my bounds
-ind_xmarg=find(x_marg_dilate>height_x*0.5);
+[xrange_new_temp2,yrange_new_temp2,flag_locnotpossible2] = get_xyrange(ASdilatetotal_rough,gridparams);
 
-% If peak is extremely narrow then sometimes not both sides from the peak
-% are included- ensure there are at least 3 values in there with the peak
-% value in the middle:
-if numel(ind_xmarg)<3
-    ind_xpeak=find(x_marg_dilate==height_x);
-    ind_xmarg = [ind_xpeak-1,ind_xpeak,ind_xpeak+1];
+if flag_locnotpossible1 || flag_locnotpossible2 %There is not enough change in bearing to get localization
+    
+    flag_locnotpossible = true;
+
+    AStotal=[];
+    ASdilatetotal=[];
+    AStotal_hyperbolas=[];
+    gridparams=[];
+
+else %There is enough change in bearing to get localization
+
+    flag_locnotpossible = false;
+
+    %-------------- Get the new range --------------------
+    xrange_new=[min(xrange_new_temp1(1),xrange_new_temp2(1)),max(xrange_new_temp1(2),xrange_new_temp2(2))];
+    yrange_new=[min(yrange_new_temp1(1),yrange_new_temp2(1)),max(yrange_new_temp1(2),yrange_new_temp2(2))];
+
+    %----------------------------------------------------------------
+    %----------------------------------------------------------------
+
+    %//////////////// 3) COMPUTE AS with FINER (desired) GRID /////////////////
+
+    %~~~~~~~~~~~~~~~~~~~~~~~~ 3.a) Create FINE GRID ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    dx=AS_params.dx; %now take the user specified resolution
+    dy=AS_params.dy;
+    sig=AS_params.sig; % user specified
+    xrange=xrange_new;
+    yrange=yrange_new;
+    [gridparams,wpos2D] = make_2Dgrids(xrange,yrange,dx,dy);
+
+    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3.b) Compute AS ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [AStotal,ASdilatetotal,AStotal_hyperbolas] = obtain_ambiguitysurface(hyph_pos,selected_indx, ...
+        AS_params,BA_params,gridparams,wpos2D,tdoa_measured_select,sig,tstep90);
+
+    %add total grid- wpos2D to the gridparams:
+    gridparams.wpos = wpos2D;
+
 end
-
-% Marginalize along y-axis
-y_marg_dilate=sum(ASdilatetotal_rough,2);
-[height_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
-
-% If there are insufficient bearing changess to have
-% a peak in the surface- it will not have a peak so just take the max:
-if isempty(height_y)
-    height_y=max(y_marg_dilate);
-    % Take 80% from the peak to be my bounds
-    ind_ymarg=find(y_marg_dilate>height_y*0.2);
-else % there is a defined peak in y marginalized surface
-    % Take 50% from the peak to be my bounds
-    ind_ymarg=find(y_marg_dilate>height_y*0.5);
-end
-
-% If peak is extremely narrow then sometimes not both sides from the peak
-% are included- ensure there are at least 3 values in there with the peak
-% value in the middle (although very unlikely in the y-direction)
-if numel(ind_ymarg)<3
-    ind_ypeak=find(y_marg_dilate==height_y);
-    ind_ymarg = [ind_ypeak-1,ind_ypeak,ind_ypeak+1];
-end
-
-xrange_new_temp2=round([gridparams.x(ind_xmarg(1))-gridparams.dx,gridparams.x(ind_xmarg(end))+gridparams.dx]);
-yrange_new_temp2=round([gridparams.y(ind_ymarg(1))-gridparams.dy,gridparams.y(ind_ymarg(end))+gridparams.dy]);
-
-%-------------- Get the new range --------------------
-xrange_new=[min(xrange_new_temp1(1),xrange_new_temp2(1)),max(xrange_new_temp1(2),xrange_new_temp2(2))];
-yrange_new=[min(yrange_new_temp1(1),yrange_new_temp2(1)),max(yrange_new_temp1(2),yrange_new_temp2(2))];
-
-%----------------------------------------------------------------
-%----------------------------------------------------------------
-
-
-%//////////////// 3) COMPUTE AS with FINER (desired) GRID /////////////////
-
-%~~~~~~~~~~~~~~~~~~~~~~~~ 3.a) Create FINE GRID ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dx=AS_params.dx; %now take the user specified resolution
-dy=AS_params.dy;
-sig=AS_params.sig; % user specified
-xrange=xrange_new;
-yrange=yrange_new;
-[gridparams,wpos2D] = make_2Dgrids(xrange,yrange,dx,dy);
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3.b) Compute AS ~~~~~~~~~~~~~~~~~~~~~~~~~~
-[AStotal,ASdilatetotal,AStotal_hyperbolas] = obtain_ambiguitysurface(hyph_pos,selected_indx, ...
-    AS_params,BA_params,gridparams,wpos2D,tdoa_measured_select,sig,tstep90);
-
-%add total grid- wpos2D to the gridparams:
-gridparams.wpos = wpos2D;
-
 
 end
