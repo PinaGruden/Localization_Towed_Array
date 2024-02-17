@@ -93,50 +93,51 @@ hyph_pos_rotd= pagetranspose(pagemtimes(rotmatfnc(-phi),pagetranspose(hyph_pos_s
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 3) Compute Ambiguity Surface ///////////////////
 tic
-[AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams]= computeAS(tdoa_measured_select, ...
+[AStotal,ASdilatetotal,AStotal_hyperbolas,gridparams,flag_locnotpossible]= computeAS(tdoa_measured_select, ...
     selected_indx,hyph_pos_rotd,AS_params,BA_params);
 toc
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 4) Extract Localization info ///////////////////
 
-% Select tallest peak as localization (since it's biambigous)
-% ----------------Non-dilated surfaces-------------------
-% Marginalize along x-axis
-%x_marg= max(AStotal,[],1);
-x_marg= sum(AStotal,1);
-[~,locs_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
+if flag_locnotpossible % Localization not possible due to not enough
+    % change in bearings or being on the edge of the grid specified by the user
 
-% Marginalize along y-axis
-% y_marg=max(AStotal,[],2);%
-y_marg=sum(AStotal,2);
-[pks_y,locs_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
-
-estim_location_m_rotd = [locs_x(:),locs_y(:)];
-
-
-%------------------ Dilated surfaces----------------------
-% Marginalize along x-axis
-x_marg_dilate= sum(ASdilatetotal,1);
-[~,locs_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
-
-% Marginalize along y-axis
-y_marg_dilate=sum(ASdilatetotal,2);
-[pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
-
-estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
-
-
-% Check if localization can be obtained- i.e. there is sufficient change in
-% bearings:
-% 
-if size(estim_location_m_rotd,2)<2 || size(estim_location_m_dilated_rotd,2)<2 % Not sufficient change in bearings - localization not possible
     loc_pos=0;
-errorMsg = "Localization not possible. \n" + ...
-    "Selected track(s) do not result in a sufficient bearing change for successfull localization. \n" + ...
-    "Try again. \n";
-fprintf(2,errorMsg)
-else % Sufficient change in bearings - localization possible
+
+    errorMsg = "Localization not possible. \n" + ...
+        "Selected track(s) do not result in a sufficient bearing change for successfull localization. \n" + ...
+        "Or they are too far away (past your specified grid). Try again. \n";
+    fprintf(2,errorMsg)
+
+else % Localization possible (Sufficient change in bearings)
+
     loc_pos=1;
+
+    % Select tallest peak as localization (since it's biambigous)
+    % ----------------Non-dilated surfaces-------------------
+    % Marginalize along x-axis
+    %x_marg= max(AStotal,[],1);
+    x_marg= sum(AStotal,1);
+    [~,locs_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+
+    % Marginalize along y-axis
+    % y_marg=max(AStotal,[],2);%
+    y_marg=sum(AStotal,2);
+    [pks_y,locs_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
+
+    estim_location_m_rotd = [locs_x(:),locs_y(:)];
+
+
+    %------------------ Dilated surfaces----------------------
+    % Marginalize along x-axis
+    x_marg_dilate= sum(ASdilatetotal,1);
+    [~,locs_x]=findpeaks(x_marg_dilate,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1);
+
+    % Marginalize along y-axis
+    y_marg_dilate=sum(ASdilatetotal,2);
+    [pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
+
+    estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
 end
 
 end
