@@ -147,8 +147,9 @@ AS_params.sig_hyperbolas = 0.00003; % STD for plotting intersecting hyperbolas
 minxrange= min(boat_pos(:,1))- 400; %- 400m to include the array behind the boat
 maxxrange= max(boat_pos(:,1)) + 2000; %add 2km in front of the array
 AS_params.xrange=[minxrange,maxxrange]; % x range in m [min,max]
-AS_params.yrange=[0,6000]; % y range in m (since boat track will be rotated
-% around x-axis, and localization is bi-ambigous specify positive y-range).
+AS_params.yrange=[-300,10000]; % y range in m (since boat track will be rotated
+% around x-axis, and localization is bi-ambigous specify positive y-range 
+% or in case sources are near trackline can add a few m on the other side- e.g. -300m).
 % The max should be maximum distance you expect to still localize your signal 
 AS_params.dx=10; % grid step size in m (resolution) in x direction
 AS_params.dy=10;% grid step size in m (resolution) in y direction
