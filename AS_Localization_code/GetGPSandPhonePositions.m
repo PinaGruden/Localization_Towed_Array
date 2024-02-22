@@ -1,4 +1,4 @@
-function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,array_data, Tracks, parameters, t_serialdate)
+function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,array_data, parameters, t_serialdate)
 % GetGPSandPhonePositions.m is a function that creates a table which
 % contains GPS data and hydrophone positions for a given timeframe of the
 % encounter (specified in t_serialdate). It assumes that boat moves in a
@@ -19,12 +19,6 @@ function [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data,arra
 %       ~ distance_behind_boat - array distance behind the boat in m
 %       ~ Hyph_1 - distance of the first sensor used from the beginning of the
 %                  array in m
-% - Tracks: a structure containing TDOA tracks. Structure has 3 fields:
-%                   ~ time - a vector of times (starting at 0) for a given
-%                           track;
-%                   ~ time_local- a vector of times (serial date format) for a
-%                           given track;                          
-%                   ~ tdoa - a vector of tdoas for a given track.
 % - parameters - a structure containing at least 3 fields:
 %               ~ parameters.arrayname - name of the array used to track
 %               (should match 'Array_name' in the array_data table)
@@ -66,17 +60,18 @@ Time_UTC=datetime(t_serialdate,'convertfrom','datenum','Format','dd-MMM-yyyy HH:
 Time_UTC=Time_UTC(:);
 
 % Get min and max time for the encounter:
-tmin = min([Tracks.time_local]); %Tracks.time_local is in datenum format
-tmax = max([Tracks.time_local]);
+t_datetime=datetime(t_serialdate, 'ConvertFrom','datenum');
+tmin= t_datetime(1);
+tmax= t_datetime(end);
 
 %% Get GPS positions of the BOAT:
 % 1) Get indices of times that match tmin&tmax from the overall GPS table:
-irow = find(datenum(gps_data.UTC(:))>tmin & datenum(gps_data.UTC(:))<tmax);
+irow = find(gps_data.UTC(:)>=tmin &  gps_data.UTC(:)<=tmax);
 gps_data_select = gps_data([irow(1)-3;irow;irow(end)+3],:); %add more 30 s of data (each point is 10 s of data) at the beginning and end to make sure you cover all possible times
 
 % 2) Interpolate Positions to match time steps used in TDOA tracks:
-interp_long= interp1(datenum(gps_data_select.UTC),gps_data_select.Longitude,t_serialdate);
-interp_lat= interp1(datenum(gps_data_select.UTC),gps_data_select.Latitude,t_serialdate);
+interp_long= interp1(gps_data_select.UTC,gps_data_select.Longitude,t_datetime);
+interp_lat= interp1(gps_data_select.UTC,gps_data_select.Latitude,t_datetime);
 
 % 3) Boat positions in Local Coordinates (X,Y)
 start_pos = [interp_lat(1),interp_long(1)]; % start position of the boat
@@ -96,12 +91,12 @@ y = polyval(p, x);
 %% Get positions of the HYDROPHONES:
 %//////// DEPTH ////////////
 % 1) Get indices of times that match tmin&tmax from the overall DEPTH table:
-irow = find(datenum(depth_data.UTC(:))>tmin & datenum(depth_data.UTC(:))<tmax);
+irow = find(depth_data.UTC(:)>=tmin & depth_data.UTC(:)<=tmax);
 depth_data_select = depth_data([irow(1)-1;irow;irow(end)+1],:);
 
 % 2) Interpolate Depths to match time steps used in TDOA tracks:
-interp_depth_s1= interp1(datenum(depth_data_select.UTC),depth_data_select.Sensor_0_Depth,t_serialdate);
-interp_depth_s2= interp1(datenum(depth_data_select.UTC),depth_data_select.Sensor_1_Depth,t_serialdate);
+interp_depth_s1= interp1(depth_data_select.UTC,depth_data_select.Sensor_0_Depth,t_datetime);
+interp_depth_s2= interp1(depth_data_select.UTC,depth_data_select.Sensor_1_Depth,t_datetime);
 
 %///////// X,Y Positions (relative to the boat) //////////
 row_number=strcmp(array_data.Array_name,parameters.arrayname);

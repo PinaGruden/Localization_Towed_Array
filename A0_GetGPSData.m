@@ -47,7 +47,7 @@ if ~isempty(folder.rawgps)
     % elimanate OS-X generated files
     idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
     files=files(idx);
-    load([folder.tdoas,files.name],'Tracks','parameters')
+    load([folder.tdoas,files.name],'parameters')
     files =dir(fullfile(folder.crosscorr,'*.mat'));
     % elimanate OS-X generated files
     idx=  cellfun(@(x) ~strcmp(x(1),'.'), {files.name}); %get indices of all files that are not '.'
@@ -58,7 +58,7 @@ if ~isempty(folder.rawgps)
     %-------------------------------------------------------------
     %---------------------CREATE A TABLE---------------------------
     [GPSandPosition_table]=GetGPSandPhonePositions(gps_data,depth_data, ...
-        array_data, Tracks, parameters, t_serialdate);
+        array_data,parameters, t_serialdate);
 
     %-------------------------------------------------------------
     %---------------------SAVE TABLE---------------------------
