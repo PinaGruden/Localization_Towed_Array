@@ -15,11 +15,14 @@ function [xrange_new,yrange_new,flag_locnotpossible] = get_xyrange(AStotal,gridp
 
  
 % Marginalize along x-axis
-x_marg= sum(AStotal,1);
+% x_marg= sum(AStotal,1);
+x_marg= max(AStotal,[],1);
 [height_x]=findpeaks(x_marg,gridparams.X(1,:),'SortStr', 'descend', 'NPeaks', 1); 
 
 % Marginalize along y-axis
-y_marg=sum(AStotal,2);
+% y_marg=sum(AStotal,2);
+y_marg=max(AStotal,[],2); %note taking max here since marginalization 
+% (summing) somethimes does not produce a peak
 [height_y]=findpeaks(y_marg,gridparams.Y(:,1),'SortStr', 'descend', 'NPeaks', 1);
 
 % Check if any of the dimensions does not have a peak (it is more likely

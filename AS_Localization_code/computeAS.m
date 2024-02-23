@@ -39,7 +39,7 @@ tstep90=tsteps(ind); % time step whenanimal is closest to the beam
 %~~~~~~~~~~~~~~~~~~~~~~~~~ 2.a) Create ROUGH GRID ~~~~~~~~~~~~~~~~~~~~~~~~~
 dx=100; %in meters- make it very coarse
 dy=100;
-sig=AS_params.sig*10; % needs to be bigger since we're using coarser resolution
+sig=AS_params.sig*3; % needs to be bigger since we're using coarser resolution
 xrange=AS_params.xrange;
 yrange=AS_params.yrange;
 [gridparams,wpos2D] = make_2Dgrids(xrange,yrange,dx,dy);
