@@ -41,7 +41,7 @@
 [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected, ...
     AS_params,BA_params,timevec);
 
-if ~isempty(SelectedTracks) %if user localizes at least one track
+if ~isempty([SelectedTracks{:}]) %if user localizes at least one track
 %//////////////////////////////////////////////////////////////////////////
 %% //////////////////// 2) Plot FINAL SURFACES ///////////////////
 boat_pos=BA_params.boat_pos;
