@@ -121,63 +121,88 @@ drawnow
 % /////////////// Keep the selected group and localizations? ///////////
 
 keep_loc = input(['Do you want to keep this localization? ' ...
+    '(1 for yes, 0 for no), then enter ']);
+if keep_loc~=0 && keep_loc~=1
+    errordlg(['Not a valid choice. Select 1 to keep localizization, or' ...
+        ' or select 0 to discard'],'Error')
+    keep_loc = input(['Do you want to keep this localization? ' ...
         '(1 for yes, 0 for no), then enter ']);
-    if keep_loc~=0 && keep_loc~=1
-        errordlg(['Not a valid choice. Select 1 to keep localizization, or' ...
-            ' or select 0 to discard'],'Error')
-        keep_loc = input(['Do you want to keep this localization? ' ...
+end
+
+%///////////////// Continue to localize? ///////////////
+continue_localize = input(['Localize another group? ' ...
+    '(1 for yes, 0 for no), then enter ']);
+if continue_localize~=0 && continue_localize~=1
+    errordlg(['Not a valid choice. Select 0 to stop localizing sources,' ...
+        ' or select 1 to localize another group'], 'Error')
+    continue_localize = input(['Localize another group? ' ...
         '(1 for yes, 0 for no), then enter ']);
+end
+
+
+
+if keep_loc==1 && continue_localize==1
+
+    % 1) save results in a table
+    Loc_table = [Loc_table;Loc_table_temp];
+
+    % 2) make the already localized tdoa tracks a different color:
+    figure(1), hold on
+    for n=1:size(SelectedTracks{k},2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local,Tracks_selected(SelectedTracks{k}(n)).tdoa,'-','Color',g_col,'LineWidth',2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local(1),Tracks_selected(SelectedTracks{k}(n)).tdoa(1),'o','Color',g_col,'LineWidth',1.5,'MarkerFaceColor',g_col)
     end
-    if keep_loc==1
-        Loc_table = [Loc_table;Loc_table_temp];
+    drawnow
+
+    % 3) increase group counter
+    k=k+1;
+
+elseif keep_loc==1 && continue_localize==0
+
+    % 1) save results in a table
+    Loc_table = [Loc_table;Loc_table_temp];
+
+    % 2) make the already localized tdoa tracks a different color:
+    figure(1), hold on
+    for n=1:size(SelectedTracks{k},2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local,Tracks_selected(SelectedTracks{k}(n)).tdoa,'-','Color',g_col,'LineWidth',2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local(1),Tracks_selected(SelectedTracks{k}(n)).tdoa(1),'o','Color',g_col,'LineWidth',1.5,'MarkerFaceColor',g_col)
+    end
+    drawnow
+
+    % 3) do not increase group counter- leave as is
+
+else % keep_loc==0 && continue_localize==1 and same for %keep_loc==0 && continue_localize==0
+    
+    % 1) Do not save results in a table - Loc_table_temp will be
+    % overwritten next turn
+
+    % 2) plot over selected tdoa tracks to return them to original color
+    figure(1), hold on
+    for n=1:size(SelectedTracks{k},2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local,Tracks_selected(SelectedTracks{k}(n)).tdoa,'-','Color',y_col,'LineWidth',2)
+        plot(Tracks_selected(SelectedTracks{k}(n)).time_local(1),Tracks_selected(SelectedTracks{k}(n)).tdoa(1),'o','Color','k','LineWidth',1.5,'MarkerFaceColor','y')
+    end
+    drawnow
+
+    % 3) REMOVE values {k} from AS & Associated arrays
+    SelectedTracks{k}=[];
+    AStotal{k}=[];
+    ASdilatetotal{k}=[];
+    AStotal_hyperbolas{k}=[];
+    NewGrid{k}=[];
+
+    % Close the plotted localizations
+    close(fig)
+
+    %reset group counter
+    if k==1
+        k=1; %if it's the first localization we are discarding we want k=1
     else
-        
-
-        % plot over selected tdoa tracks
-        figure(1), hold on
-        for n=1:size(SelectedTracks{k},2)
-            plot(Tracks_selected(SelectedTracks{k}(n)).time_local,Tracks_selected(SelectedTracks{k}(n)).tdoa,'-','Color',y_col,'LineWidth',2)
-            plot(Tracks_selected(SelectedTracks{k}(n)).time_local(1),Tracks_selected(SelectedTracks{k}(n)).tdoa(1),'o','Color','k','LineWidth',1.5,'MarkerFaceColor','y')
-        end
-        drawnow
-
-        % REMOVE values {k} from AS
-        SelectedTracks{k}=[];
-        AStotal{k}=[];
-        ASdilatetotal{k}=[];
-        AStotal_hyperbolas{k}=[];
-        NewGrid{k}=[];
-
-        %close the plotted localizations
-        close(fig) 
-
-        %reset group counter
         k=k-1;
     end
 
-
-%///////////////// Continue to localize? ///////////////
-
-    continue_localize = input(['Localize another group? ' ...
-        '(1 for yes, 0 for no), then enter ']);
-    if continue_localize~=0 && continue_localize~=1
-        errordlg(['Not a valid choice. Select 0 to stop localizing sources,' ...
-            ' or select 1 to localize another group'], 'Error')
-        continue_localize = input(['Localize another group? ' ...
-        '(1 for yes, 0 for no), then enter ']);
-    end
-    if continue_localize==1
-        % make the already localized tdoa tracks a different color:
-        figure(1), hold on
-        for n=1:size(SelectedTracks{k},2)
-            plot(Tracks_selected(SelectedTracks{k}(n)).time_local,Tracks_selected(SelectedTracks{k}(n)).tdoa,'-','Color',g_col,'LineWidth',2)
-            plot(Tracks_selected(SelectedTracks{k}(n)).time_local(1),Tracks_selected(SelectedTracks{k}(n)).tdoa(1),'o','Color',g_col,'LineWidth',1.5,'MarkerFaceColor',g_col)
-        end
-        drawnow
-
-        %increase group counter
-        k=k+1;
-    end
+end
 
 end
 
@@ -187,4 +212,5 @@ AStotal=AStotal(1:k);
 ASdilatetotal=ASdilatetotal(1:k);
 AStotal_hyperbolas=AStotal_hyperbolas(1:k);
 NewGrid=NewGrid(1:k);
+
 end
