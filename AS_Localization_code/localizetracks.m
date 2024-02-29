@@ -122,23 +122,27 @@ drawnow
 
 keep_loc = input(['Do you want to keep this localization? ' ...
     '(1 for yes, 0 for no), then enter ']);
-if keep_loc~=0 && keep_loc~=1
+
+%Add a catch for if user by accident presess enter or something else than 0
+%or 1:
+while isempty(keep_loc) || keep_loc~=0 && keep_loc~=1
     errordlg(['Not a valid choice. Select 1 to keep localizization, or' ...
         ' or select 0 to discard'],'Error')
     keep_loc = input(['Do you want to keep this localization? ' ...
         '(1 for yes, 0 for no), then enter ']);
+
 end
 
 %///////////////// Continue to localize? ///////////////
 continue_localize = input(['Localize another group? ' ...
     '(1 for yes, 0 for no), then enter ']);
-if continue_localize~=0 && continue_localize~=1
+
+while isempty(continue_localize) || continue_localize~=0 && continue_localize~=1
     errordlg(['Not a valid choice. Select 0 to stop localizing sources,' ...
         ' or select 1 to localize another group'], 'Error')
     continue_localize = input(['Localize another group? ' ...
         '(1 for yes, 0 for no), then enter ']);
 end
-
 
 
 if keep_loc==1 && continue_localize==1
