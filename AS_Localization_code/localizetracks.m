@@ -1,5 +1,5 @@
 function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected,AS_params, ...
-    BA_params,timevec)
+    BA_params,timevec,folder2save2)
 % localizetracks.m is a function that localizes user selected TDOA
 % tracks/track segments. It plots them as they are localized and user has
 % the option to either keep localizations or not. User also has an option
@@ -26,6 +26,7 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 %           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
 %            coordinates are considered. M = number of time steps. 
 % - timevec = a vector of times that covers the duration of the encounter
+% - folder2save2 = path to folder where results are saved to.
 %
 % OUPUTS:
 % - AStotal: final ambiguity surface, a 1 x M cell array where M is a 
@@ -149,6 +150,11 @@ if keep_loc==1 && continue_localize==1
 
     % 1) save results in a table
     Loc_table = [Loc_table;Loc_table_temp];
+    
+    % 1.a) save temp results (in case the machine crashes)
+    save([folder2save2,'TempResults.mat'],...
+        'Loc_table','AStotal','ASdilatetotal', ...
+        'AStotal_hyperbolas', 'NewGrid','hyph_pos','boat_pos')
 
     % 2) make the already localized tdoa tracks a different color:
     figure(1), hold on
