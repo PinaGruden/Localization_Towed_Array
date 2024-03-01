@@ -39,7 +39,7 @@
 % distance to trackline - results are saved in 'Loc_table'
 
 [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewGrid] = localizetracks(Tracks_selected, ...
-    AS_params,BA_params,timevec);
+    AS_params,BA_params,timevec,folder2save2);
 
 if ~isempty([SelectedTracks{:}]) %if user localizes at least one track
 %//////////////////////////////////////////////////////////////////////////
