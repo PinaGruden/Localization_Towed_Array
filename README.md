@@ -9,6 +9,8 @@ passive acoustic arrays. _The Journal of the Acoustical Society of America_,
 - Yvonne M Barkley, Eva-Marie Nosal, and Erin M Oleson. Model-based localization
 of deep-diving cetaceans using towed line array acoustic data. _The Journal
 of the Acoustical Society of America_, 150(2):1120–1132, 2021.
+
+Copyright (c) 2024, Pina Gruden 
  
 
 ## 1. Required Matlab version and toolboxes
