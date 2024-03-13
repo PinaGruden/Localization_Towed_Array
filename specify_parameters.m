@@ -25,7 +25,7 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 %   ~ dy : grid step size in m (resolution) in y direction - a scalar
 %   ~ c : speed of sound - a scalar
 %   ~ mean_horiz_swimspeed : mean horizontal swim speed [m/s] - a scalar
-%   ~ bearing_cuttof : cutoff for min bearing around the beam to be
+%   ~ bearing_cutoff : cutoff for min bearing around the beam to be
 %                      considered in the analysis - a scalar
 %   ~ tdoa_cutoff : cutoff for min tdoa around the beam to be
 %                      considered in the analysis - a scalar
@@ -163,14 +163,14 @@ AS_params.mean_horiz_swimspeed= 0.5; %mean horizontal swim speed [m/s]
 %------------ Specify cutoff criteria for tracks around the beam ---------
 % Specify what is the first degrees to be considered around the beam - this
 % will affect which tracks you consider for localization
-AS_params.bearing_cuttof = 60; 
+AS_params.bearing_cutoff = 60; 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~COMPUTED:~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %-------- Compute TDOA cutoff based on the specified bearing cutoff--------
 bear2tdoa= @(x) cosd(x).*(parameters.d/AS_params.c);
-AS_params.tdoa_cutoff = bear2tdoa(AS_params.bearing_cuttof);
+AS_params.tdoa_cutoff = bear2tdoa(AS_params.bearing_cutoff);
 
 %----------------Create a grid for surface evaluation----------------
 % At the moment grid is fixed, but in future it should move with sensors.
