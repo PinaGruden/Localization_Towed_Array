@@ -21,7 +21,8 @@ function [SelectedTracks,AStotal,ASdilatetotal,AStotal_hyperbolas,Loc_table,NewG
 %              (decimal degrees), 1 x 2 vector [latitude, longitude];
 %       ~ hyph_pos: two sensor positions per time step- a 2 x N x M array, 
 %           where N=2 if (x,y) coordinates are considered or N=3 if (x,y,z)
-%            coordinates are considered. M = number of time steps.         
+%            coordinates are considered. M = number of time steps.
+%       ~ d : distance between the sensors
 % - timevec : a 1 x M vector of times that covers the duration of the encounter  
 %
 %OUTPUTS:
@@ -65,7 +66,7 @@ while loc_pos~=1
 % Select which TDOA track or which fragments you want to compute
 % localization for
 
-[tdoa_measured_select,selected_indx,SelectedTracks] = select_tracks(Tracks, ...
+[tdoa_measured_select,selected_indx,SelectedTracks,datetime_select] = select_tracks(Tracks, ...
     timevec,AS_params.tdoa_cutoff);
 
 %//////////////////////////////////////////////////////////////////////////
@@ -138,6 +139,34 @@ else % Localization possible (Sufficient change in bearings)
     [pks_y_dilate,locs_y]=findpeaks(y_marg_dilate,gridparams.Y(:,1), 'SortStr', 'descend', 'NPeaks', 1);
 
     estim_location_m_dilated_rotd = [locs_x(:),locs_y(:)];
+
+    % ------------ Localization timing info-----------------
+    % Time when first bearing used for this localization occurs:
+    loc_start_time= datetime(min(datetime_select), 'ConvertFrom','datenum'); 
+    
+    % Time when las bearing used for this localization occurs:
+    loc_end_time=datetime(max(datetime_select), 'ConvertFrom','datenum'); 
+
+    % Beam time (if it exists):
+    bear2tdoa= @(x) cosd(x).*(BA_params.d/AS_params.c);
+    % allow bearings between 88-92 degrees to count as the beam (so +/- 2
+    % degrees deviation):
+    [v,i]=min(abs(tdoa_measured_select));
+
+    if v < abs(bear2tdoa(92))
+        loc_beam_time = datetime(datetime_select(i), 'ConvertFrom','datenum');
+    else % the selected tracks used for localization don't cross the beam
+        loc_beam_time=datetime(7e+05, 'ConvertFrom','datenum');
+        %I cannot assign Nan value to this- needs to be datetime array, so
+        %the times where the tracks dont cross the beam will be
+        %'14-Jul-1916 00:00:00'.
+    end
+    %the below wont work for tracks that go beyond the user specified maxtdoa
+    %criteria (since Tracks struct contains the full tdoa track (not just
+    %the chunk within the bounds- which is what was used for localization)):
+    % loc_start_time= datetime(min(horzcat(Tracks(SelectedTracks).time_local)), 'ConvertFrom','datenum'); 
+    % loc_end_time= datetime(max(horzcat(Tracks(SelectedTracks).time_local)), 'ConvertFrom','datenum');
+    
 end
 
 end
@@ -233,10 +262,12 @@ NewGrid.Y=Y_new;
 %% /////////////// 7) Create a table with localization info ////////////// 
 
 Loc_table = table({SelectedTracks}, ...
+    loc_start_time, loc_end_time, loc_beam_time,...
     estim_location_m,estim_location_m_low,estim_location_m_hi,estim_location_latlong, ...
     estim_location_m_dilated,estim_location_m_dilated_low,estim_location_m_dilated_hi,estim_location_latlong_dilated, ...
     d_m,[d_m_low,d_m_high],d_m_dilated,[d_m_dilated_low,d_m_dilated_high], ...
     'VariableNames',{'TrackID', ...
+    'Loc_start_time','Loc_end_time', 'Loc_beam_time',...
     'Loc_m','Loc_m_min','Loc_m_max','Loc_LatLong', ...
     'Loc_m_dilated','Loc_m_dilated_min','Loc_m_dilated_max','Loc_LatLong_dilated', ...
     'distance_m','distance_m_minmax','distance_m_dilated','distance_m_dilated_minmax'});

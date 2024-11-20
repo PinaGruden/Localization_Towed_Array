@@ -65,7 +65,8 @@ function [AS_params,BA_params] = specify_parameters(parameters)
 %           where M is number of time steps, and each row is [x,y] coordinate 
 %           for that time step
 %           * boat_start_latlong - boat start position in latitude and longitude 
-%              (decimal degrees), 1 x 2 vector [latitude, longitude];
+%              (decimal degrees), 1 x 2 vector [latitude, longitude];  
+%           * d : distance between the sensors
 %
 %
 %Pina Gruden, Dec 2022, UH Manoa
@@ -126,7 +127,7 @@ switch BA_params.get_hyph_pos
         boat_pos(:,2)=GPSandPosition_table.Boat_pos_y_m;
         BA_params.boat_pos=boat_pos;
         BA_params.boat_start_latlong=[GPSandPosition_table.Boat_Latitude(1),GPSandPosition_table.Boat_Longitude(1)];
-
+        BA_params.d=parameters.d; % distance between the sensors
 end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
