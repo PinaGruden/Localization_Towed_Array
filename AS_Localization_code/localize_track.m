@@ -149,11 +149,11 @@ else % Localization possible (Sufficient change in bearings)
 
     % Beam time (if it exists):
     bear2tdoa= @(x) cosd(x).*(BA_params.d/AS_params.c);
-    % allow bearings between 88-92 degrees to count as the beam (so +/- 2
+    % allow bearings between 87-93 degrees to count as the beam (so +/- 2
     % degrees deviation):
     [v,i]=min(abs(tdoa_measured_select));
 
-    if v < abs(bear2tdoa(92))
+    if v < abs(bear2tdoa(93))
         loc_beam_time = datetime(datetime_select(i), 'ConvertFrom','datenum');
     else % the selected tracks used for localization don't cross the beam
         loc_beam_time=datetime(7e+05, 'ConvertFrom','datenum');
