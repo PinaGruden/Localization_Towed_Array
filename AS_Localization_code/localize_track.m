@@ -151,21 +151,9 @@ else % Localization possible (Sufficient change in bearings)
     bear2tdoa= @(x) cosd(x).*(BA_params.d/AS_params.c);
     % allow bearings between 87-93 degrees to count as the beam (so +/- 2
     % degrees deviation):
-    [v,i]=min(abs(tdoa_measured_select));
+    beam_threshold = abs(bear2tdoa(93));
 
-    if v < abs(bear2tdoa(93))
-        loc_beam_time = datetime(datetime_select(i), 'ConvertFrom','datenum');
-    else % the selected tracks used for localization don't cross the beam
-        loc_beam_time=datetime(7e+05, 'ConvertFrom','datenum');
-        %I cannot assign Nan value to this- needs to be datetime array, so
-        %the times where the tracks dont cross the beam will be
-        %'14-Jul-1916 00:00:00'.
-    end
-    %the below wont work for tracks that go beyond the user specified maxtdoa
-    %criteria (since Tracks struct contains the full tdoa track (not just
-    %the chunk within the bounds- which is what was used for localization)):
-    % loc_start_time= datetime(min(horzcat(Tracks(SelectedTracks).time_local)), 'ConvertFrom','datenum'); 
-    % loc_end_time= datetime(max(horzcat(Tracks(SelectedTracks).time_local)), 'ConvertFrom','datenum');
+   [loc_beam_time] = get_beamtime(tdoa_measured_select,datetime_select,beam_threshold);
     
 end
 
