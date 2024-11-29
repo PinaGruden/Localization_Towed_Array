@@ -1,4 +1,4 @@
-function [tdoa_select, selected_indx, SelectedTracks] = select_tracks(Tracks,timevec,maxtdoa)
+function [tdoa_select, selected_indx, SelectedTracks,datetime_select] = select_tracks(Tracks,timevec,maxtdoa)
 % select_tracks.m allows user to select which TDOA track or which fragments
 % they want to use to obtain the localization for. 
 %
@@ -24,6 +24,7 @@ function [tdoa_select, selected_indx, SelectedTracks] = select_tracks(Tracks,tim
 Ntsteps=numel(timevec); %number of time steps
 Nsources=size(Tracks,2);
 tdoa_measured= nan(Nsources,Ntsteps);
+datetime_measured=nan(Nsources,Ntsteps);
 for k=1:Nsources
     t_indx_temp1=ismember(timevec,Tracks(k).time);
     t_indx_temp2=ismember(timevec,Tracks(k).time_local);
@@ -39,7 +40,7 @@ for k=1:Nsources
             'the time stamps in your tdoa track. Check for errors and try again.'])
     end
     tdoa_measured(k,time_indx)= Tracks(k).tdoa;
-
+    datetime_measured(k,time_indx)= Tracks(k).time_local;
 end
 
 %-------- Select which tracks you want to compute the surfaces for------
@@ -73,5 +74,7 @@ end
 selected_indx=sum(selected_indx,1);
 tdoa_select=sum(tdoa_measured(SelectedTracks,:),1,'omitnan');
 tdoa_select(selected_indx==0)=NaN;
+datetime_select=sum(datetime_measured(SelectedTracks,:),1,'omitnan');
+datetime_select(selected_indx==0)=NaN;
 
 end
