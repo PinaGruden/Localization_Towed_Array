@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "Localization_Towed_Array: Model-based localization of marine mammals from towed array data"
+version: 1.3.0
+date-released: 2026-10-15
+authors:
+  - family-names: Gruden
+    given-names: Pina
+    orcid: "https://orcid.org/0000-0001-8756-6514"
+    affiliation: "Pina Gruden s.p."
+license: BSD-3-Clause-Clear
+repository-code: "https://github.com/PinaGruden/Localization_Towed_Array"
+abstract: >-
+  A MATLAB package for model-based localization of marine mammals from
+  towed hydrophone array data. It takes tracked time-differences-of-arrival
+  (TDOAs) from the companion package TDOA_tracking_master and estimates
+  source positions using ambiguity surfaces and array geometry from GPS
+  and sensor-depth data.
+keywords:
+  - passive acoustic monitoring
+  - acoustic localization
+  - towed hydrophone array
+  - marine mammals
+  - MATLAB
+references:
+  - type: article
+    authors:
+      - family-names: Barkley
+        given-names: Yvonne M.
+      - family-names: Nosal
+        given-names: Eva-Marie
+      - family-names: Oleson
+        given-names: Erin M.
+    title: "Model-based localization of deep-diving cetaceans using towed line array acoustic data"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 150
+    issue: 2
+    start: 1120
+    end: 1132
+    year: 2021
+  - type: article
+    authors:
+      - family-names: Nosal
+        given-names: Eva-Marie
+    title: "Methods for tracking multiple marine mammals with wide-baseline passive acoustic arrays"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 134
+    issue: 3
+    start: 2383
+    end: 2392
+    year: 2013
