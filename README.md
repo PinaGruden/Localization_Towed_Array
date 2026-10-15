@@ -1,4 +1,5 @@
 # Localization Towed Array
+ [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23397660.svg)](https://doi.org/10.5281/zenodo.23397660)
  
  This package contains code for the model-based localization of marine mammals from towed array data. Ambiguity surfaces (probabilistic indicators of source positions) (Nosal, 2013; Barkley et al., 2021) are used to perform the localization. **Note, it is assumed that the boat moves in a straight line and no turns are present.**
 
