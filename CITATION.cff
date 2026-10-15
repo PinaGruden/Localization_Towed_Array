@@ -13,11 +13,15 @@ authors:
 license: BSD-3-Clause-Clear
 repository-code: "https://github.com/PinaGruden/Localization_Towed_Array"
 abstract: >-
-  A MATLAB package for model-based localization of marine mammals from
-  towed hydrophone array data. It takes tracked time-differences-of-arrival
-  (TDOAs) from the companion package TDOA_tracking_master and estimates
-  source positions using ambiguity surfaces and array geometry from GPS
-  and sensor-depth data.
+  Localization_Towed_Array is a MATLAB package for model-based localization
+  of marine mammals from towed hydrophone array data. It takes tracked
+  time-differences-of-arrival (TDOAs) from the companion package
+  TDOA_tracking_master and estimates source positions using ambiguity
+  surfaces combined with array geometry from GPS and sensor-depth data,
+  assuming the vessel travels in a straight line. Outputs include
+  localization estimates in Cartesian and latitude/longitude coordinates,
+  perpendicular distances to the array, ambiguity surfaces and plots.
+  Simulation scenarios and a test example are included.
 keywords:
   - passive acoustic monitoring
   - acoustic localization
