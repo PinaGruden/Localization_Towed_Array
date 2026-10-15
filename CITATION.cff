@@ -4,6 +4,7 @@ type: software
 title: "Localization_Towed_Array: Model-based localization of marine mammals from towed array data"
 version: 1.3.0
 date-released: 2026-10-15
+doi: 10.5281/zenodo.23397660
 authors:
   - family-names: Gruden
     given-names: Pina
